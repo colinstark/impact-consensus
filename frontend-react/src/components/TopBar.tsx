@@ -1,7 +1,8 @@
 import { Link, useNavigate } from 'react-router-dom'
 import { LANGS, langLabels, useI18n } from '../lib/i18n'
 import { useAuth } from '../lib/auth'
-import { ChevronLeft, Person } from './Icons'
+import { useFriends } from '../lib/friends'
+import { ChevronLeft, People, Person } from './Icons'
 
 export function Logo() {
   return (
@@ -20,6 +21,7 @@ export function Logo() {
 export function TopBar({ back, title }: { back?: boolean; title?: string }) {
   const { lang, setLang } = useI18n()
   const { user } = useAuth()
+  const { available, unread } = useFriends()
   const nav = useNavigate()
 
   return (
@@ -53,6 +55,16 @@ export function TopBar({ back, title }: { back?: boolean; title?: string }) {
               ))}
             </select>
           </label>
+          {available && (
+            <Link to="/friends" aria-label={unread ? `Friends, ${unread} new` : 'Friends'} className="relative grid size-8 place-items-center rounded-full text-ink-2">
+              <People />
+              {unread > 0 && (
+                <span className="absolute -top-0.5 -right-0.5 grid min-w-4 place-items-center rounded-full bg-yes px-1 text-[10px] font-bold leading-4 text-white tabular">
+                  {unread > 9 ? '9+' : unread}
+                </span>
+              )}
+            </Link>
+          )}
           <Link
             to={user ? '/about' : '/signin'}
             aria-label={user ? user.email : 'Sign in'}

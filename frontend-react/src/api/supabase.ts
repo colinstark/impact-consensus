@@ -1,7 +1,7 @@
 import type { SupabaseClient } from '@supabase/supabase-js'
 import { DISTRICTS } from '../data/districts'
 import { mockApi } from './mock'
-import type { Api, Choice, Insights, Localized, Source, Tally, Topic } from './types'
+import type { AgeBracket, Analysis, Api, Choice, Gender, Insights, Localized, Source, Tally, Topic } from './types'
 
 // Real backend: each analysed article in Supabase is a topic. Its `statement` is the
 // question people vote on and its `description` is the neutral context.
@@ -22,6 +22,8 @@ type Row = {
   published_at: string | null
   votes: { stance: 'agree' | 'disagree' }[]
   article_topics: { topics: { name: string } | null }[]
+  // One analysis per article; PostgREST may return it as an object or a one-item list.
+  article_analysis?: { status: string; analysis: Analysis | null } | { status: string; analysis: Analysis | null }[] | null
 }
 
 const COLUMNS =
@@ -63,8 +65,14 @@ function toTopic(row: Row): Topic {
     context: same(row.description ?? ''),
     tally: tallyOf(row.votes),
     sources: [source],
+    analysis: analysisOf(row) ?? undefined,
     createdAt: row.published_at ?? row.created_at,
   }
+}
+
+function analysisOf(row: Row) {
+  const a = Array.isArray(row.article_analysis) ? row.article_analysis[0] : row.article_analysis
+  return a?.status === 'ok' ? a.analysis : null
 }
 
 const total = (t: Tally) => t.yes + t.no
@@ -106,7 +114,7 @@ export function supabaseApi(db: SupabaseClient): Api {
       if (!isArticle(slug)) return mockApi.getTopic(slug)
       const { data, error } = await db
         .from('articles')
-        .select(COLUMNS)
+        .select(`${COLUMNS}, article_analysis(status, analysis)`)
         .eq('id', slug)
         .not('statement', 'is', null)
         .maybeSingle()
@@ -145,13 +153,15 @@ export function supabaseApi(db: SupabaseClient): Api {
       if (!isArticle(topicId)) return mockApi.getInsights(topicId)
       const { data, error } = await db
         .from('votes')
-        .select('stance, created_at, barrios(district)')
+        .select('stance, created_at, age_bracket, gender, barrios(district)')
         .eq('article_id', topicId)
         .order('created_at')
       if (error) throw error
       const rows = data as unknown as {
         stance: 'agree' | 'disagree'
         created_at: string
+        age_bracket: AgeBracket | null
+        gender: Gender | null
         barrios: { district: string | null } | null
       }[]
       const empty: Insights = { dates: [], overall: [], byDistrict: {}, byAge: {}, byGender: {} }
@@ -180,8 +190,12 @@ export function supabaseApi(db: SupabaseClient): Api {
       }
       const byDistrict: Insights['byDistrict'] = {}
       for (const { id } of DISTRICTS) byDistrict[id] = running((r) => idOf[r.barrios?.district ?? ''] === id)
-      // Age and gender aren't stored in the database yet, so those views stay empty.
-      return { ...empty, dates, overall: running(() => true), byDistrict }
+      // Only groups that have votes, so the page doesn't show empty bars.
+      const byAge: Insights['byAge'] = {}
+      for (const age of new Set(rows.map((r) => r.age_bracket))) if (age) byAge[age] = running((r) => r.age_bracket === age)
+      const byGender: Insights['byGender'] = {}
+      for (const g of new Set(rows.map((r) => r.gender))) if (g) byGender[g] = running((r) => r.gender === g)
+      return { ...empty, dates, overall: running(() => true), byDistrict, byAge, byGender }
     },
 
     // Stored in the browser until profiles gain the sign-up fields (see API.md).
