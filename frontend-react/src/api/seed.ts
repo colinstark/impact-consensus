@@ -1,9 +1,30 @@
-import type { Topic } from './types'
+import type { Source, Topic } from './types'
+
+// Outlets whose coverage frames these topics. Until the backend serves the real
+// articles (see the articles table in Supabase), each link opens that outlet's
+// coverage of the topic via a news search, so every link works.
+const OUTLETS = [
+  { outlet: 'La Vanguardia', site: 'lavanguardia.com' },
+  { outlet: 'El Periódico', site: 'elperiodico.com' },
+  { outlet: 'Ara', site: 'ara.cat' },
+  { outlet: 'betevé', site: 'beteve.cat' },
+  { outlet: 'El País', site: 'elpais.com' },
+]
+
+export function coverage(query: string): Source[] {
+  return OUTLETS.map(({ outlet, site }) => ({
+    outlet,
+    title: query,
+    kind: 'search' as const,
+    url: `https://news.google.com/search?q=${encodeURIComponent(`${query} site:${site}`)}&hl=es&gl=ES&ceid=ES:es`,
+  }))
+}
 
 // Demo topics for the Barcelona MVP. Tallies are illustrative, not real data.
 export const seedTopics: Topic[] = [
   {
     id: 'tourism-cap',
+    city: 'barcelona',
     slug: 'tourists-go-home',
     area: 'Barcelona',
     category: { en: 'Tourism', es: 'Turismo', ca: 'Turisme' },
@@ -17,12 +38,14 @@ export const seedTopics: Topic[] = [
       es: 'Unos 15 millones de personas visitaron la ciudad en 2025. Las protestas de "tourists go home" dieron la vuelta al mundo. Pero ¿qué piensan realmente quienes viven aquí?',
       ca: 'Uns 15 milions de persones van visitar la ciutat el 2025. Les protestes de "tourists go home" van fer la volta al món. Però què en pensen realment els qui hi viuen?',
     },
-    tally: { yes: 1842, no: 2011, skip: 388 },
+    tally: { yes: 1842, no: 2011 },
     headlineYesShare: 0.82,
+    sources: coverage('límite turistas Barcelona'),
     createdAt: '2026-06-02',
   },
   {
     id: 'tourist-flats',
+    city: 'barcelona',
     slug: 'tourist-flats-2028',
     area: 'Barcelona',
     category: { en: 'Housing', es: 'Vivienda', ca: 'Habitatge' },
@@ -36,12 +59,14 @@ export const seedTopics: Topic[] = [
       es: 'El Ayuntamiento prevé retirar unas 10.000 licencias de pisos turísticos para liberar viviendas.',
       ca: 'L’Ajuntament preveu retirar unes 10.000 llicències de pisos turístics per alliberar habitatges.',
     },
-    tally: { yes: 2630, no: 1104, skip: 201 },
+    tally: { yes: 2630, no: 1104 },
     headlineYesShare: 0.9,
+    sources: coverage('pisos turísticos Barcelona 2028'),
     createdAt: '2026-05-14',
   },
   {
     id: 'superilles',
+    city: 'barcelona',
     slug: 'more-superilles',
     area: 'Eixample',
     category: { en: 'Streets', es: 'Calles', ca: 'Carrers' },
@@ -55,12 +80,14 @@ export const seedTopics: Topic[] = [
       es: 'Las superilles cierran calles al tráfico de paso y convierten cruces en plazas. Unos las adoran; otros las culpan de desviar el tráfico.',
       ca: 'Les superilles tanquen carrers al trànsit de pas i converteixen cruïlles en places. Uns les estimen; d’altres les culpen de desviar el trànsit.',
     },
-    tally: { yes: 1320, no: 1188, skip: 240 },
+    tally: { yes: 1320, no: 1188 },
     headlineYesShare: 0.35,
+    sources: coverage('superilles Barcelona'),
     createdAt: '2026-04-20',
   },
   {
     id: 'cruise-ships',
+    city: 'barcelona',
     slug: 'limit-cruise-ships',
     area: 'Port',
     category: { en: 'Tourism', es: 'Turismo', ca: 'Turisme' },
@@ -74,11 +101,13 @@ export const seedTopics: Topic[] = [
       es: 'Barcelona es el primer puerto de cruceros de Europa. Los visitantes de un día gastan menos y se concentran en Ciutat Vella.',
       ca: 'Barcelona és el primer port de creuers d’Europa. Els visitants d’un dia gasten menys i es concentren a Ciutat Vella.',
     },
-    tally: { yes: 1980, no: 612, skip: 315 },
+    tally: { yes: 1980, no: 612 },
+    sources: coverage('cruceros puerto Barcelona límite'),
     createdAt: '2026-05-30',
   },
   {
     id: 'terraces',
+    city: 'barcelona',
     slug: 'terraces-close-11pm',
     area: 'Gràcia',
     category: { en: 'Nightlife', es: 'Ocio nocturno', ca: 'Oci nocturn' },
@@ -92,11 +121,13 @@ export const seedTopics: Topic[] = [
       es: 'Los vecinos se quejan del ruido; los bares dicen que las terrazas mantienen vivo el pequeño comercio.',
       ca: 'Els veïns es queixen del soroll; els bars diuen que les terrasses mantenen viu el petit comerç.',
     },
-    tally: { yes: 904, no: 1077, skip: 176 },
+    tally: { yes: 904, no: 1077 },
+    sources: coverage('terrazas horario Gràcia vecinos'),
     createdAt: '2026-07-08',
   },
   {
     id: 'door-to-door',
+    city: 'barcelona',
     slug: 'door-to-door-waste',
     area: 'Sant Andreu',
     category: { en: 'Waste', es: 'Residuos', ca: 'Residus' },
@@ -110,11 +141,13 @@ export const seedTopics: Topic[] = [
       es: 'Se retiran los contenedores y cada residuo se recoge en días fijos. El reciclaje sube, pero también las quejas por bolsas en los portales.',
       ca: 'Es retiren els contenidors i cada residu es recull en dies fixos. El reciclatge puja, però també les queixes per bosses als portals.',
     },
-    tally: { yes: 402, no: 655, skip: 298 },
+    tally: { yes: 402, no: 655 },
+    sources: coverage('recogida puerta a puerta Barcelona'),
     createdAt: '2026-08-01',
   },
   {
     id: 'via-laietana',
+    city: 'barcelona',
     slug: 'via-laietana-cars',
     area: 'Ciutat Vella',
     category: { en: 'Streets', es: 'Calles', ca: 'Carrers' },
@@ -128,11 +161,13 @@ export const seedTopics: Topic[] = [
       es: 'La avenida ya se ha reducido a un carril por sentido, con autobuses, bicis y aceras más anchas.',
       ca: 'L’avinguda ja s’ha reduït a un carril per sentit, amb autobusos, bicis i voreres més amples.',
     },
-    tally: { yes: 713, no: 690, skip: 150 },
+    tally: { yes: 713, no: 690 },
+    sources: coverage('Via Laietana coches'),
     createdAt: '2026-06-18',
   },
   {
     id: 'sagrada-stairs',
+    city: 'barcelona',
     slug: 'sagrada-familia-stairway',
     area: 'Sagrada Família',
     category: { en: 'Housing', es: 'Vivienda', ca: 'Habitatge' },
@@ -146,11 +181,13 @@ export const seedTopics: Topic[] = [
       es: 'Los planos de Gaudí incluyen una gran escalinata sobre el carrer de Mallorca, donde hoy viven unas 1.000 personas.',
       ca: 'Els plànols de Gaudí inclouen una gran escalinata sobre el carrer de Mallorca, on avui viuen unes 1.000 persones.',
     },
-    tally: { yes: 288, no: 1540, skip: 202 },
+    tally: { yes: 288, no: 1540 },
+    sources: coverage('escalinata Sagrada Família afectados'),
     createdAt: '2026-07-22',
   },
   {
     id: 'bunkers',
+    city: 'barcelona',
     slug: 'bunkers-night-access',
     area: 'Horta-Guinardó',
     category: { en: 'Public space', es: 'Espacio público', ca: 'Espai públic' },
@@ -164,7 +201,8 @@ export const seedTopics: Topic[] = [
       es: 'El mirador se hizo viral en redes. Los vecinos denuncian aglomeraciones y ruido hasta altas horas.',
       ca: 'El mirador es va fer viral a les xarxes. Els veïns denuncien aglomeracions i soroll fins a altes hores.',
     },
-    tally: { yes: 822, no: 541, skip: 133 },
+    tally: { yes: 822, no: 541 },
+    sources: coverage('Búnkers del Carmel cierre noche'),
     createdAt: '2026-08-12',
   },
 ]

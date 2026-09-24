@@ -1,11 +1,13 @@
 import { motion } from 'framer-motion'
 import { Link, useParams } from 'react-router-dom'
-import { Chart, ChevronRight, Lock, Share } from '../components/Icons'
+import { useEffect } from 'react'
+import { Chart, ChevronRight, Lock, MapIcon, Share } from '../components/Icons'
 import { useToast } from '../components/Toast'
 import { TopBar } from '../components/TopBar'
 import { Eyebrow, TopicRow } from '../components/TopicCard'
 import { VotePanel } from '../components/VotePanel'
 import { useAuth } from '../lib/auth'
+import { useCity } from '../lib/city'
 import { useI18n } from '../lib/i18n'
 import { shareTopic } from '../lib/share'
 import { useTopic, useTopics } from '../lib/useTopics'
@@ -15,11 +17,17 @@ import NotFound from './NotFound'
 export default function TopicPage() {
   const { slug } = useParams()
   const topic = useTopic(slug)
-  const { topics } = useTopics()
+  const { city, setCity } = useCity()
+  const { topics } = useTopics(topic?.city ?? null)
   const { mine } = useVotes()
   const { user } = useAuth()
   const { t, l } = useI18n()
   const toast = useToast()
+
+  // Arriving from a QR code counts as choosing the topic's city.
+  useEffect(() => {
+    if (topic && !city) setCity(topic.city)
+  }, [topic, city, setCity])
 
   if (topic === null) return <NotFound />
 
@@ -60,6 +68,11 @@ export default function TopicPage() {
                 transition={{ delay: 0.3 }}
                 className="mt-4 divide-y divide-hair overflow-hidden rounded-[18px] bg-card"
               >
+                <Link to={`/t/${topic.slug}/barrios`} className="flex items-center gap-3 px-4 py-3.5 active:bg-fill">
+                  <span className="grid size-8 place-items-center rounded-[9px] bg-no text-white"><MapIcon className="size-[18px]" /></span>
+                  <span className="flex-1 text-[16px] font-medium">{t('byBarrio')}</span>
+                  <ChevronRight className="size-4 text-ink-3" />
+                </Link>
                 <Link to={`/t/${topic.slug}/trend`} className="flex items-center gap-3 px-4 py-3.5 active:bg-fill">
                   <span className="grid size-8 place-items-center rounded-[9px] bg-yes text-white"><Chart className="size-[18px]" /></span>
                   <span className="flex-1 text-[16px] font-medium">{t('seeTrend')}</span>

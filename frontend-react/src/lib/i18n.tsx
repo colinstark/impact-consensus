@@ -15,19 +15,11 @@ const strings = {
   trending: { en: 'Trending now', es: 'Tendencias', ca: 'Tendències' },
   yes: { en: 'Yes', es: 'Sí', ca: 'Sí' },
   no: { en: 'No', es: 'No', ca: 'No' },
-  skip: {
-    en: 'Don’t mind — show results',
-    es: 'Me da igual — ver resultados',
-    ca: 'M’és igual — veure resultats',
-  },
   voteToSee: { en: 'Vote to see results', es: 'Vota para ver resultados', ca: 'Vota per veure’n els resultats' },
   votes: { en: 'votes', es: 'votos', ca: 'vots' },
-  dontMind: { en: 'don’t mind', es: 'les da igual', ca: 'els és igual' },
   sayYes: { en: 'say yes', es: 'dicen sí', ca: 'diuen sí' },
   sayNo: { en: 'say no', es: 'dicen no', ca: 'diuen no' },
   youSaid: { en: 'You said', es: 'Dijiste', ca: 'Vas dir' },
-  youSkipped: { en: 'You’re just looking', es: 'Solo estás mirando', ca: 'Només estàs mirant' },
-  haveAView: { en: 'Actually, I have a view', es: 'En realidad, tengo opinión', ca: 'De fet, tinc opinió' },
   changeVote: { en: 'Change vote', es: 'Cambiar voto', ca: 'Canviar el vot' },
   headlines: { en: 'Headlines suggest', es: 'Los titulares sugieren', ca: 'Els titulars suggereixen' },
   gapNote: {
@@ -52,9 +44,9 @@ const strings = {
   seeTrend: { en: 'How opinion has shifted', es: 'Cómo ha cambiado la opinión', ca: 'Com ha canviat l’opinió' },
   trendTitle: { en: 'Opinion over time', es: 'Opinión en el tiempo', ca: 'Opinió en el temps' },
   trendSub: {
-    en: 'Share of the community saying yes (excluding “don’t mind”).',
-    es: 'Porcentaje de la comunidad que dice sí (sin contar “me da igual”).',
-    ca: 'Percentatge de la comunitat que diu sí (sense comptar “m’és igual”).',
+    en: 'Share of the community saying yes.',
+    es: 'Porcentaje de la comunidad que dice sí.',
+    ca: 'Percentatge de la comunitat que diu sí.',
   },
   range1m: { en: '1M', es: '1M', ca: '1M' },
   range3m: { en: '3M', es: '3M', ca: '3M' },
@@ -89,6 +81,281 @@ const strings = {
   notFound: { en: 'We couldn’t find that topic.', es: 'No encontramos ese tema.', ca: 'No trobem aquest tema.' },
   backHome: { en: 'See all topics', es: 'Ver todos los temas', ca: 'Veure tots els temes' },
   error: { en: 'Something went wrong. Try again.', es: 'Algo salió mal. Inténtalo de nuevo.', ca: 'Alguna cosa ha fallat. Torna-ho a provar.' },
+  tellMore: {
+    en: 'I don’t know — tell me more',
+    es: 'No lo sé — cuéntame más',
+    ca: 'No ho sé — explica-m’ho',
+  },
+  readUpTitle: {
+    en: 'Read up before you vote',
+    es: 'Infórmate antes de votar',
+    ca: 'Informa’t abans de votar',
+  },
+  readUpBody: {
+    en: 'Coverage from the outlets we used to frame this question. Links open the outlet’s site.',
+    es: 'Cobertura de los medios que usamos para plantear esta pregunta. Los enlaces abren la web del medio.',
+    ca: 'Cobertura dels mitjans que hem fet servir per plantejar aquesta pregunta. Els enllaços obren el web del mitjà.',
+  },
+  backToVote: {
+    en: 'Back to vote',
+    es: 'Volver a votar',
+    ca: 'Tornar a votar',
+  },
+  noSources: {
+    en: 'No stories linked yet.',
+    es: 'Aún no hay noticias enlazadas.',
+    ca: 'Encara no hi ha notícies enllaçades.',
+  },
+  coverageIn: {
+    en: 'Coverage in {o}',
+    es: 'Cobertura en {o}',
+    ca: 'Cobertura a {o}',
+  },
+  cityTitle: {
+    en: 'Which city do you live in?',
+    es: '¿En qué ciudad vives?',
+    ca: 'En quina ciutat vius?',
+  },
+  cityBody: {
+    en: 'We’ll show you the questions your community is voting on.',
+    es: 'Te mostraremos las preguntas que vota tu comunidad.',
+    ca: 'Et mostrarem les preguntes que vota la teva comunitat.',
+  },
+  cityLabel: {
+    en: 'Your city',
+    es: 'Tu ciudad',
+    ca: 'La teva ciutat',
+  },
+  comingSoon: {
+    en: 'coming soon',
+    es: 'próximamente',
+    ca: 'aviat',
+  },
+  continue: {
+    en: 'Continue',
+    es: 'Continuar',
+    ca: 'Continuar',
+  },
+  changeCity: {
+    en: 'Change city',
+    es: 'Cambiar ciudad',
+    ca: 'Canviar de ciutat',
+  },
+  byBarrio: {
+    en: 'Opinions by barrio',
+    es: 'Opiniones por barrio',
+    ca: 'Opinions per barri',
+  },
+  byBarrioSub: {
+    en: 'How each of {c}’s districts voted.',
+    es: 'Cómo ha votado cada distrito de {c}.',
+    ca: 'Com ha votat cada districte de {c}.',
+  },
+  postcodeTitle: {
+    en: 'Where do you live?',
+    es: '¿Dónde vives?',
+    ca: 'On vius?',
+  },
+  postcodeBody: {
+    en: 'Enter your postcode once to see opinions by barrio. We place your votes in your district — we never store your address.',
+    es: 'Introduce tu código postal una vez para ver opiniones por barrio. Situamos tus votos en tu distrito; nunca guardamos tu dirección.',
+    ca: 'Introdueix el teu codi postal un cop per veure opinions per barri. Situem els teus vots al teu districte; mai no guardem la teva adreça.',
+  },
+  postcode: {
+    en: 'Postcode',
+    es: 'Código postal',
+    ca: 'Codi postal',
+  },
+  postcodeInvalid: {
+    en: 'That isn’t a Barcelona postcode. Try one from 08001 to 08042.',
+    es: 'Ese no es un código postal de Barcelona. Prueba uno entre 08001 y 08042.',
+    ca: 'Aquest no és un codi postal de Barcelona. Prova’n un entre 08001 i 08042.',
+  },
+  showMap: {
+    en: 'Show the map',
+    es: 'Ver el mapa',
+    ca: 'Veure el mapa',
+  },
+  yourDistrict: {
+    en: 'Your district',
+    es: 'Tu distrito',
+    ca: 'El teu districte',
+  },
+  you: {
+    en: 'You',
+    es: 'Tú',
+    ca: 'Tu',
+  },
+  changePostcode: {
+    en: 'Change postcode',
+    es: 'Cambiar código postal',
+    ca: 'Canviar el codi postal',
+  },
+  moreNo: {
+    en: 'More no',
+    es: 'Más no',
+    ca: 'Més no',
+  },
+  moreYes: {
+    en: 'More yes',
+    es: 'Más sí',
+    ca: 'Més sí',
+  },
+  even: {
+    en: 'Split',
+    es: 'Empate',
+    ca: 'Empat',
+  },
+  tapDistrict: {
+    en: 'Tap a district for details.',
+    es: 'Toca un distrito para ver detalles.',
+    ca: 'Toca un districte per veure’n els detalls.',
+  },
+  allDistricts: {
+    en: 'All districts',
+    es: 'Todos los distritos',
+    ca: 'Tots els districtes',
+  },
+  proposals: {
+    en: 'Proposed questions',
+    es: 'Preguntas propuestas',
+    ca: 'Preguntes proposades',
+  },
+  proposalsSub: {
+    en: 'Questions from the community. {n} upvotes within 48 hours puts a question on the main list.',
+    es: 'Preguntas de la comunidad. Con {n} apoyos en 48 horas, una pregunta entra en la lista principal.',
+    ca: 'Preguntes de la comunitat. Amb {n} suports en 48 hores, una pregunta entra a la llista principal.',
+  },
+  propose: {
+    en: 'Propose a question',
+    es: 'Proponer una pregunta',
+    ca: 'Proposar una pregunta',
+  },
+  proposeCta: {
+    en: 'Got a question for {c}?',
+    es: '¿Tienes una pregunta para {c}?',
+    ca: 'Tens una pregunta per a {c}?',
+  },
+  seeAll: {
+    en: 'See all',
+    es: 'Ver todas',
+    ca: 'Veure-les totes',
+  },
+  upvoteWith: {
+    en: 'Upvote with your answer',
+    es: 'Apóyala con tu respuesta',
+    ca: 'Dona-hi suport amb la teva resposta',
+  },
+  upvoted: {
+    en: 'Upvoted · you said {a}',
+    es: 'Apoyada · dijiste {a}',
+    ca: 'Suport donat · vas dir {a}',
+  },
+  upvotesOf: {
+    en: '{n} of {t} upvotes',
+    es: '{n} de {t} apoyos',
+    ca: '{n} de {t} suports',
+  },
+  hoursLeft: {
+    en: '{h}h left',
+    es: 'quedan {h} h',
+    ca: 'queden {h} h',
+  },
+  minutesLeft: {
+    en: '{m} min left',
+    es: 'quedan {m} min',
+    ca: 'queden {m} min',
+  },
+  accepted: {
+    en: 'Added to the list',
+    es: 'Añadida a la lista',
+    ca: 'Afegida a la llista',
+  },
+  expired: {
+    en: 'Didn’t make it in time',
+    es: 'No llegó a tiempo',
+    ca: 'No hi ha arribat a temps',
+  },
+  acceptedToast: {
+    en: 'It reached 100 — now on the main list!',
+    es: '¡Ha llegado a 100! Ya está en la lista principal.',
+    ca: 'Ha arribat a 100! Ja és a la llista principal.',
+  },
+  openTopic: {
+    en: 'Vote on it',
+    es: 'Votar',
+    ca: 'Votar',
+  },
+  newBody: {
+    en: 'Ask a yes-or-no question about {c}. If {n} people upvote it within 48 hours, everyone gets to vote on it.',
+    es: 'Haz una pregunta de sí o no sobre {c}. Si {n} personas la apoyan en 48 horas, todo el mundo podrá votarla.',
+    ca: 'Fes una pregunta de sí o no sobre {c}. Si {n} persones hi donen suport en 48 hores, tothom la podrà votar.',
+  },
+  qLabel: {
+    en: 'Your question',
+    es: 'Tu pregunta',
+    ca: 'La teva pregunta',
+  },
+  qPlaceholder: {
+    en: 'Should…?',
+    es: '¿Debería…?',
+    ca: 'Hauria…?',
+  },
+  areaLabel: {
+    en: 'Where does it apply?',
+    es: '¿Dónde se aplica?',
+    ca: 'On s’aplica?',
+  },
+  wholeCity: {
+    en: 'The whole city',
+    es: 'Toda la ciudad',
+    ca: 'Tota la ciutat',
+  },
+  contextLabel: {
+    en: 'Background (optional)',
+    es: 'Contexto (opcional)',
+    ca: 'Context (opcional)',
+  },
+  contextPlaceholder: {
+    en: 'A sentence or two of neutral facts.',
+    es: 'Una o dos frases con datos neutrales.',
+    ca: 'Una o dues frases amb dades neutrals.',
+  },
+  yourAnswer: {
+    en: 'Your answer',
+    es: 'Tu respuesta',
+    ca: 'La teva resposta',
+  },
+  answerNote: {
+    en: 'Your answer counts as the first upvote.',
+    es: 'Tu respuesta cuenta como el primer apoyo.',
+    ca: 'La teva resposta compta com el primer suport.',
+  },
+  submit: {
+    en: 'Submit question',
+    es: 'Enviar pregunta',
+    ca: 'Enviar la pregunta',
+  },
+  guidelines: {
+    en: 'Keep it neutral and about one issue. Questions naming private individuals are removed.',
+    es: 'Que sea neutral y sobre un solo tema. Se eliminan las preguntas que mencionan a particulares.',
+    ca: 'Que sigui neutral i sobre un sol tema. S’eliminen les preguntes que esmenten particulars.',
+  },
+  proposalLive: {
+    en: 'Your question is live for 48 hours',
+    es: 'Tu pregunta está activa 48 horas',
+    ca: 'La teva pregunta és activa 48 hores',
+  },
+  tooShort: {
+    en: 'Write a question of at least 15 characters.',
+    es: 'Escribe una pregunta de al menos 15 caracteres.',
+    ca: 'Escriu una pregunta d’almenys 15 caràcters.',
+  },
+  fromCommunity: {
+    en: 'From the community',
+    es: 'De la comunidad',
+    ca: 'De la comunitat',
+  },
 } satisfies Record<string, Localized>
 
 export type StringKey = keyof typeof strings

@@ -6,12 +6,12 @@ import { Lock } from './Icons'
 const pct = (x: number) => Math.round(x * 100)
 
 export function shares(t: Tally) {
-  const decided = t.yes + t.no
-  const yes = decided ? t.yes / decided : 0.5
-  return { yes, no: 1 - yes, decided, total: decided + t.skip }
+  const total = t.yes + t.no
+  const yes = total ? t.yes / total : 0.5
+  return { yes, no: 1 - yes, total }
 }
 
-/** Yes vs No split. Yes/No are two identities of one question; "don't mind" is reported, not plotted. */
+/** Yes vs No split for one question. */
 export function ResultBar({
   tally,
   headlineYesShare,
@@ -86,7 +86,7 @@ export function ResultBar({
         <Legend color="bg-no" label={t('no')} share={s.no} count={n(tally.no)} align="right" />
       </div>
       <p className={`mt-2 text-ink-3 tabular ${big ? 'text-[13px]' : 'text-[12px]'}`}>
-        {n(s.total)} {t('votes')} · {n(tally.skip)} {t('dontMind')}
+        {n(s.total)} {t('votes')}
       </p>
       {big && headlineYesShare != null && (
         <p className="mt-4 rounded-2xl bg-fill px-4 py-3 text-[15px] leading-snug text-ink-2">

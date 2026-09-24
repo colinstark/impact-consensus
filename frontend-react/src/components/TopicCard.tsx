@@ -2,23 +2,28 @@ import { motion } from 'framer-motion'
 import { Link } from 'react-router-dom'
 import type { Topic } from '../api/types'
 import { useI18n } from '../lib/i18n'
-import { ChevronRight, Pin } from './Icons'
+import { useVotes } from '../lib/votes'
+import { ChevronRight, MapIcon, Pin } from './Icons'
 import { VotePanel } from './VotePanel'
 
 export function Eyebrow({ topic }: { topic: Topic }) {
-  const { l } = useI18n()
+  const { l, t } = useI18n()
   return (
     <div className="flex items-center gap-1.5 text-[13px] font-medium text-ink-3">
       <Pin />
       <span>{topic.area}</span>
       <span aria-hidden>·</span>
       <span>{l(topic.category)}</span>
+      {topic.fromProposal && (
+        <span className="ml-1 rounded-full bg-fill px-2 py-px text-[11px] font-semibold text-ink-2">{t('fromCommunity')}</span>
+      )}
     </div>
   )
 }
 
 export function TopicCard({ topic, index = 0 }: { topic: Topic; index?: number }) {
-  const { l } = useI18n()
+  const { l, t } = useI18n()
+  const { mine } = useVotes()
   return (
     <motion.article
       layout
@@ -37,6 +42,16 @@ export function TopicCard({ topic, index = 0 }: { topic: Topic; index?: number }
       <div className="mt-5">
         <VotePanel topic={topic} />
       </div>
+      {mine[topic.id] && (
+        <Link
+          to={`/t/${topic.slug}/barrios`}
+          className="mt-4 flex items-center gap-2 border-t border-hair pt-3.5 text-[15px] font-medium text-yes"
+        >
+          <MapIcon className="size-[18px]" />
+          <span className="flex-1">{t('byBarrio')}</span>
+          <ChevronRight className="size-4" />
+        </Link>
+      )}
     </motion.article>
   )
 }

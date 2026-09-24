@@ -11,11 +11,17 @@ All bodies are JSON. Types (`Topic`, `Tally`, `Choice`, `TrendPoint`) are define
 
 | Method | Path | Body / query | Returns |
 |---|---|---|---|
-| GET | `/topics` | — | `Topic[]`, ordered by activity (most-voted first) |
+| GET | `/topics` | `?city=barcelona` | `Topic[]`, ordered by activity (most-voted first) |
 | GET | `/topics/:slug` | — | `Topic` or **404** |
-| PUT | `/topics/:id/votes` | `{ choice: "yes" \| "no" \| "skip", deviceId, source? }` | `Tally` (updated counts) |
+| PUT | `/topics/:id/votes` | `{ choice: "yes" \| "no", deviceId, source?, districtId? }` | `Tally` (updated counts) |
 | GET | `/devices/:deviceId/votes` | — | `{ [topicId]: Choice }` |
+| PATCH | `/devices/:deviceId` | `{ districtId }` | **204**; tags this device's past and future votes |
+| GET | `/topics/:id/districts` | — | `DistrictResult[]` (one per district, `"01"`–`"10"`) |
 | GET | `/topics/:id/trend` | `?range=1m\|3m\|all` | `TrendPoint[]` (daily, oldest first) |
+| GET | `/proposals` | `?city=barcelona` | `Proposal[]` (open first, then accepted, then expired) |
+| POST | `/proposals` | `{ city, question, context?, area, answer, deviceId }` | `Proposal` |
+| PUT | `/proposals/:id/upvotes` | `{ answer: "yes" \| "no", deviceId }` | `Proposal` (updated) |
+| GET | `/devices/:deviceId/upvotes` | — | `{ [proposalId]: Choice }` |
 | POST | `/auth/magic-link` | `{ email }` | **204** |
 
 ## Notes
@@ -23,12 +29,20 @@ All bodies are JSON. Types (`Topic`, `Tally`, `Choice`, `TrendPoint`) are define
 - **One vote per device per topic.** `PUT` replaces any earlier vote from the same `deviceId`
   (so people can change their mind, or go from "skip" to yes/no). `deviceId` is a random UUID stored
   in the browser, so no account is needed to vote.
-- **`skip`** means "don't mind, just show me the results". It counts toward `tally.skip` but is left out
-  of the yes/no percentages.
 - **`source`** is the `?src=` value from the entry URL (e.g. `qr-rambla-01`), so you can see which
   posters bring people in. It's kept for the whole browser session.
 - **`headlineYesShare`** (optional, 0–1) is what media coverage implies the "yes" share is. It's shown
   as a marker on the results bar next to the real result.
+- **Cities:** only `barcelona` is live. The city picker lists others as "coming soon" (`src/data/cities.ts`).
+- **Districts:** ids are the Ajuntament's two-digit codes (`01` Ciutat Vella … `10` Sant Martí). Names match
+  `barrios.district` in Supabase. The postcode → district lookup runs on the device (`src/data/districts.ts`);
+  only the `districtId` is sent, never the postcode.
+- **Sources** (`Topic.sources`) power "I don't know — tell me more". Each is `{ outlet, title, url, publishedAt? }`,
+  which maps directly onto the `articles` table. The mock uses `kind: "search"` links to each outlet's coverage
+  until real articles are served. Leave `kind` out for real articles.
+- **Proposals:** one upvote per device, and every upvote carries a yes/no answer. When `upvotes` reaches 100 before
+  `expiresAt` (created + 48 h), set `status: "accepted"`, create a topic, carry the upvote answers over as its
+  votes, and return its `topicSlug`. After 48 h without 100 upvotes the status becomes `expired`.
 - **Localised fields** (`question`, `context`, `category`) are `{ en, es, ca }` objects.
 - **Trend** `yesShare` = yes / (yes + no) cumulative up to that day; `votes` = cumulative yes + no.
 - **Magic link:** the email should link to the front end with a token. The front end currently keeps

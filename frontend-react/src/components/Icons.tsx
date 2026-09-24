@@ -39,3 +39,24 @@ export const Pin = ({ className = 'size-3.5' }: P) => (
 export const Sparkle = ({ className = 'size-4' }: P) => (
   <svg {...base} className={className}><path d="M12 3v4M12 17v4M3 12h4M17 12h4M6 6l2.5 2.5M15.5 15.5L18 18M6 18l2.5-2.5M15.5 8.5L18 6" /></svg>
 )
+export const MapIcon = ({ className = 'size-5' }: P) => (
+  <svg {...base} className={className}><path d="M9 4L3 6.5v13.5l6-2.5 6 2.5 6-2.5V4l-6 2.5L9 4z" /><path d="M9 4v13.5M15 6.5V20" /></svg>
+)
+export const Clock = ({ className = 'size-3.5' }: P) => (
+  <svg {...base} className={className}><circle cx="12" cy="12" r="9" /><path d="M12 7v5l3 2" /></svg>
+)
+export const Plus = ({ className = 'size-5' }: P) => (
+  <svg {...base} className={className}><path d="M12 5v14M5 12h14" /></svg>
+)
+export const External = ({ className = 'size-4' }: P) => (
+  <svg {...base} className={className}><path d="M14 4h6v6M20 4l-9 9" /><path d="M18 14v4a2 2 0 01-2 2H6a2 2 0 01-2-2V8a2 2 0 012-2h4" /></svg>
+)
+export const Book = ({ className = 'size-4' }: P) => (
+  <svg {...base} className={className}><path d="M4 5a2 2 0 012-2h13v16H6a2 2 0 00-2 2V5z" /><path d="M4 19a2 2 0 012-2h13" /></svg>
+)
+export const ArrowUp = ({ className = 'size-4' }: P) => (
+  <svg {...base} className={className}><path d="M12 19V5M6 11l6-6 6 6" /></svg>
+)
+export const ChevronDown = ({ className = 'size-4' }: P) => (
+  <svg {...base} className={className}><path d="M6 9l6 6 6-6" /></svg>
+)

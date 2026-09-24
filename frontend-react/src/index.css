@@ -18,6 +18,7 @@
   --neutral: #d6d5d0;
   --glass: rgb(242 242 247 / 0.72);
   --seg: #ffffff;
+  --map-mid: #e4e2dc;
 }
 @media (prefers-color-scheme: dark) {
   :root {
@@ -36,6 +37,7 @@
     --neutral: #4a4a47;
     --glass: rgb(0 0 0 / 0.66);
     --seg: #636366;
+    --map-mid: #4a4945;
   }
 }
 

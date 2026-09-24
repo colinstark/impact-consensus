@@ -2,12 +2,13 @@ import { useEffect, useState } from 'react'
 import { api } from '../api'
 import type { Topic } from '../api/types'
 
-export function useTopics() {
+export function useTopics(city: string | null) {
   const [topics, setTopics] = useState<Topic[] | null>(null)
   const [error, setError] = useState(false)
   useEffect(() => {
-    api.listTopics().then(setTopics).catch(() => setError(true))
-  }, [])
+    if (!city) return
+    api.listTopics(city).then(setTopics).catch(() => setError(true))
+  }, [city])
   return { topics, error }
 }
 

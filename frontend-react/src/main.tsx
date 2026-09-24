@@ -4,7 +4,9 @@ import { BrowserRouter } from 'react-router-dom'
 import App from './App'
 import { ToastProvider } from './components/Toast'
 import { AuthProvider } from './lib/auth'
+import { CityProvider } from './lib/city'
 import { I18nProvider } from './lib/i18n'
+import { ProfileProvider } from './lib/profile'
 import { VotesProvider } from './lib/votes'
 import './index.css'
 
@@ -13,11 +15,15 @@ createRoot(document.getElementById('root')!).render(
     <BrowserRouter>
       <I18nProvider>
         <AuthProvider>
-          <VotesProvider>
-            <ToastProvider>
-              <App />
-            </ToastProvider>
-          </VotesProvider>
+          <CityProvider>
+            <ProfileProvider>
+              <VotesProvider>
+                <ToastProvider>
+                  <App />
+                </ToastProvider>
+              </VotesProvider>
+            </ProfileProvider>
+          </CityProvider>
         </AuthProvider>
       </I18nProvider>
     </BrowserRouter>

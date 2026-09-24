@@ -1,11 +1,16 @@
 import { AnimatePresence, motion } from 'framer-motion'
 import { useEffect, useRef } from 'react'
-import { Lock, Sparkle } from '../components/Icons'
+import { Link } from 'react-router-dom'
+import { ChevronDown, ChevronRight, Lock, Pin, Plus, Sparkle } from '../components/Icons'
+import { ProposalCard } from '../components/ProposalCard'
 import { TopBar } from '../components/TopBar'
 import { TopicCard } from '../components/TopicCard'
 import { useToast } from '../components/Toast'
 import type { Topic } from '../api/types'
+import { cityName } from '../data/cities'
+import { useCity } from '../lib/city'
 import { useI18n } from '../lib/i18n'
+import { UPVOTE_THRESHOLD, useProposals } from '../lib/useProposals'
 import { useTopics } from '../lib/useTopics'
 import { useVotes } from '../lib/votes'
 
@@ -24,7 +29,10 @@ function visibleTopics(topics: Topic[], answered: Record<string, unknown>) {
 
 export default function Home() {
   const { t } = useI18n()
-  const { topics, error } = useTopics()
+  const { city } = useCity()
+  const { topics, error } = useTopics(city)
+  const proposals = useProposals(city)
+  const openProposals = proposals.proposals?.filter((p) => p.status === 'open').slice(0, 2) ?? []
   const { mine, ready } = useVotes()
   const toast = useToast()
 
@@ -43,7 +51,14 @@ export default function Home() {
     <>
       <TopBar />
       <main className="mx-auto max-w-xl px-4 pb-16 safe-bottom">
-        <section className="pt-8 pb-6">
+        <section className="pt-6 pb-6">
+          <Link
+            to="/city"
+            aria-label={t('changeCity')}
+            className="mb-4 inline-flex items-center gap-1 rounded-full bg-fill px-3 py-1 text-[13px] font-semibold text-ink-2"
+          >
+            <Pin /> {cityName(city ?? '')} <ChevronDown className="size-3.5" />
+          </Link>
           <motion.h1
             initial={{ opacity: 0, y: 8 }}
             animate={{ opacity: 1, y: 0 }}
@@ -88,6 +103,32 @@ export default function Home() {
             </motion.div>
           )}
         </div>
+
+        <section className="mt-12">
+          <div className="mb-3 flex items-baseline justify-between px-1">
+            <h2 className="text-[22px] font-bold tracking-tight">{t('fromCommunity')}</h2>
+            <Link to="/proposals" className="flex items-center text-[15px] font-medium text-yes">
+              {t('seeAll')} <ChevronRight className="size-4" />
+            </Link>
+          </div>
+          <p className="mb-4 px-1 text-[15px] leading-snug text-ink-2">{t('proposalsSub', { n: UPVOTE_THRESHOLD })}</p>
+          <div className="space-y-3">
+            {openProposals.map((p) => (
+              <ProposalCard key={p.id} proposal={p} myAnswer={proposals.mine[p.id]} onUpvote={proposals.upvote} />
+            ))}
+          </div>
+          <Link
+            to="/proposals/new"
+            className="mt-3 flex items-center gap-3 rounded-[22px] border border-dashed border-hair p-5 active:bg-fill"
+          >
+            <span className="grid size-10 shrink-0 place-items-center rounded-full bg-ink text-bg"><Plus /></span>
+            <span className="flex-1">
+              <span className="block text-[17px] font-semibold">{t('proposeCta', { c: cityName(city ?? '') })}</span>
+              <span className="block text-[14px] text-ink-2">{t('propose')}</span>
+            </span>
+            <ChevronRight className="size-4 text-ink-3" />
+          </Link>
+        </section>
       </main>
     </>
   )
