@@ -34,6 +34,15 @@
   $effect(() => {
     spring.target = target
   })
+
+  // Bump the chosen bubble so a vote registers even when the split doesn't move (e.g. unanimous).
+  function vote(kind) {
+    const casting = mine !== kind
+    if (onvote(kind) && casting) {
+      spring.target = { ...target, [kind]: { ...target[kind], r: Math.max(target[kind].r * 1.25, 8) } }
+      setTimeout(() => (spring.target = target), 140)
+    }
+  }
 </script>
 
 <svg class="tally" class:unvoted={!total} viewBox="0 0 {SIZE} {SIZE}" width={SIZE} height={SIZE} role="group" aria-label="{agree} agree, {disagree} disagree">
@@ -50,8 +59,8 @@
       tabindex="0"
       aria-label={kind === 'agree' ? 'Agree' : 'Disagree'}
       aria-pressed={mine === kind}
-      onclick={() => onvote(kind)}
-      onkeydown={(e) => (e.key === 'Enter' || e.key === ' ') && (e.preventDefault(), onvote(kind))}
+      onclick={() => vote(kind)}
+      onkeydown={(e) => (e.key === 'Enter' || e.key === ' ') && (e.preventDefault(), vote(kind))}
     />
   {/each}
 </svg>

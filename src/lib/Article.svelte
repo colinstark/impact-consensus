@@ -21,7 +21,7 @@
   }
 
   function vote(stance) {
-    if (!gate()) return
+    if (!gate()) return false
     const key = { article_id: article.id, user_id: user.id }
     // Clicking your current stance again retracts the vote.
     run(
@@ -29,6 +29,7 @@
         ? supabase.from('votes').delete().match(key)
         : supabase.from('votes').upsert({ ...key, stance }),
     )
+    return true
   }
 
   async function addContext(e) {
