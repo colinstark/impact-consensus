@@ -43,12 +43,12 @@ button.link { padding: 0; border: 0; background: none; color: var(--ink); text-d
 .muted { color: var(--muted); font-size: 0.875rem; margin: 0; }
 .error { color: var(--disagree); font-size: 0.875rem; }
 .empty { padding: 32px 0; }
+.empty a { color: inherit; }
 
 .compose { padding: 16px; margin-bottom: 24px; }
 .add { display: flex; gap: 8px; }
 .add input { border-radius: 999px; padding: 10px 18px; background: #fcfbf9; }
 .add button { border-radius: 999px; padding: 8px 20px; }
-.compose .error { margin: 8px 4px 0; }
 
 .card {
   margin-bottom: 16px;
@@ -127,6 +127,28 @@ button.link { padding: 0; border: 0; background: none; color: var(--ink); text-d
 .composer input { border-radius: 999px; padding: 8px 16px; }
 .composer button { flex: none; width: 38px; height: 38px; padding: 0; border-radius: 50%; font-size: 1.1rem; line-height: 1; }
 .join { align-self: flex-start; margin-top: 4px; font-size: 0.875rem; color: var(--muted); }
+
+h1 a { color: inherit; text-decoration: none; }
+main > .error { margin: 0 0 16px; }
+
+.back { display: inline-block; margin-bottom: 16px; color: var(--muted); text-decoration: none; }
+.back:hover { color: var(--ink); }
+.detail-body { padding: 28px 32px 24px; }
+.detail-vote {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
+  gap: 20px;
+  margin-bottom: 24px;
+}
+.detail-vote > :first-child { justify-self: end; }
+.detail-vote > :last-child { justify-self: start; }
+.detail-vote .tally { width: 140px; height: 140px; }
+.detail-vote .vote { padding: 8px 20px; font-size: 1rem; }
+.headline { font: 600 1.75rem/1.25 Georgia, serif; margin: 0 0 10px; text-wrap: balance; }
+.source { margin-bottom: 16px; }
+.source a { color: var(--ink); }
+.description { margin: 0; font-size: 1.0625rem; white-space: pre-wrap; }
 
 dialog { padding: 0; border: 0; border-radius: 10px; width: min(400px, 90vw); }
 dialog::backdrop { background: rgb(0 0 0 / 0.35); }

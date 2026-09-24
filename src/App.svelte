@@ -3,6 +3,9 @@
   import SignIn from './lib/SignIn.svelte'
   import Profile from './lib/Profile.svelte'
   import Article from './lib/Article.svelte'
+  import Detail from './lib/Detail.svelte'
+  import { voteStats } from './lib/article.js'
+  import { route, go } from './lib/router.svelte.js'
 
   const FREE_VOTES = 3
   const HOUR = 60 * 60 * 1000
@@ -11,6 +14,7 @@
   let user = $state(null)
   let profile = $state(null)
   let articles = $state([])
+  let loaded = $state(false)
   let modal = $state(null) // 'signin' | 'limit' | 'profile'
   let url = $state('')
   let error = $state('')
@@ -18,6 +22,8 @@
   // Anonymous users are guests who voted; members have an email-backed account.
   const memberId = $derived(user && !user.is_anonymous ? user.id : null)
   const canPostNow = $derived(!!(memberId && profile))
+  const detailId = $derived(Number(route.path.match(/^\/article\/(\d+)$/)?.[1]) || null)
+  const detail = $derived(detailId && articles.find((a) => a.id === detailId))
 
   supabase.auth.getSession().then(({ data }) => (user = data.session?.user ?? null))
   supabase.auth.onAuthStateChange((_event, session) => {
@@ -50,6 +56,7 @@
       .order('created_at', { referencedTable: 'article_context' })
     if (err) error = err.message
     else articles = data
+    loaded = true
   }
 
   load()
@@ -75,6 +82,25 @@
     return data.user?.id
   }
 
+  // Returns synchronously whether the vote goes ahead, so the bubble can react instantly.
+  function vote(article, stance) {
+    const retracting = voteStats(article, user?.id).mine === stance
+    if (!retracting && !allowVote()) return false
+    cast(article.id, stance, retracting)
+    return true
+  }
+
+  async function cast(articleId, stance, retracting) {
+    const uid = await voterId()
+    if (!uid) return
+    const key = { article_id: articleId, user_id: uid }
+    const { error: err } = await (retracting
+      ? supabase.from('votes').delete().match(key)
+      : supabase.from('votes').upsert({ ...key, stance }))
+    error = err?.message ?? ''
+    if (!err) load()
+  }
+
   // Posting needs an account and a nickname; opens whichever step is missing.
   function canPost() {
     if (!memberId) modal = 'signin'
@@ -96,7 +122,7 @@
 </script>
 
 <header>
-  <h1>Impact Consensus</h1>
+  <h1><a href="/" onclick={go}>Impact Consensus</a></h1>
   {#if memberId}
     <button class="link" onclick={() => (modal = 'profile')}>{profile?.nickname ?? user.email}</button>
     <button class="link muted" onclick={() => supabase.auth.signOut()}>Sign out</button>
@@ -106,19 +132,28 @@
 </header>
 
 <main>
-  <section class="card compose">
-    <form class="add" onsubmit={add}>
-      <input type="url" required placeholder="Share an article link…" bind:value={url} />
-      <button type="submit">Post</button>
-    </form>
-    {#if error}<p class="error">{error}</p>{/if}
-  </section>
+  {#if error}<p class="error">{error}</p>{/if}
 
-  {#each articles as article (article.id)}
-    <Article {article} {user} canPost={canPostNow} {allowVote} {voterId} onjoin={canPost} onchange={load} />
+  {#if detailId}
+    {#if detail}
+      <Detail article={detail} {user} canPost={canPostNow} onvote={(s) => vote(detail, s)} onjoin={canPost} onchange={load} />
+    {:else if loaded}
+      <p class="muted empty">Article not found. <a href="/" onclick={go}>Back to all articles</a></p>
+    {/if}
   {:else}
-    <p class="muted empty">No articles yet. Add the first one.</p>
-  {/each}
+    <section class="card compose">
+      <form class="add" onsubmit={add}>
+        <input type="url" required placeholder="Share an article link…" bind:value={url} />
+        <button type="submit">Post</button>
+      </form>
+    </section>
+
+    {#each articles as article (article.id)}
+      <Article {article} {user} canPost={canPostNow} onvote={(s) => vote(article, s)} onjoin={canPost} onchange={load} />
+    {:else}
+      {#if loaded}<p class="muted empty">No articles yet. Add the first one.</p>{/if}
+    {/each}
+  {/if}
 </main>
 
 {#if modal === 'signin' || modal === 'limit'}

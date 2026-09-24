@@ -1,3 +1,9 @@
 [build]
   command = "npm run build"
   publish = "dist"
+
+# Client-side routes (e.g. /article/12) all serve the app shell.
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
