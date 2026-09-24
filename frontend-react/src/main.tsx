@@ -5,6 +5,7 @@ import App from './App'
 import { ToastProvider } from './components/Toast'
 import { AuthProvider } from './lib/auth'
 import { CityProvider } from './lib/city'
+import { FriendsProvider } from './lib/friends'
 import { I18nProvider } from './lib/i18n'
 import { ProfileProvider } from './lib/profile'
 import { VotesProvider } from './lib/votes'
@@ -18,9 +19,11 @@ createRoot(document.getElementById('root')!).render(
           <CityProvider>
             <ProfileProvider>
               <VotesProvider>
-                <ToastProvider>
-                  <App />
-                </ToastProvider>
+                <FriendsProvider>
+                  <ToastProvider>
+                    <App />
+                  </ToastProvider>
+                </FriendsProvider>
               </VotesProvider>
             </ProfileProvider>
           </CityProvider>

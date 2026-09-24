@@ -69,3 +69,12 @@ export const PlayIcon = ({ className = 'size-4' }: P) => (
 export const PauseIcon = ({ className = 'size-4' }: P) => (
   <svg viewBox="0 0 24 24" aria-hidden className={className} fill="currentColor"><rect x="6" y="5" width="4" height="14" rx="1.2" /><rect x="14" y="5" width="4" height="14" rx="1.2" /></svg>
 )
+export const Send = ({ className = 'size-5' }: P) => (
+  <svg {...base} className={className}><path d="M21 3L10 14" /><path d="M21 3l-7 18-4-7-7-4 18-7z" /></svg>
+)
+export const Inbox = ({ className = 'size-5' }: P) => (
+  <svg {...base} className={className}><path d="M3 13l3-8h12l3 8" /><path d="M3 13v6h18v-6h-5l-1.5 2.5h-5L8 13H3z" /></svg>
+)
+export const People = ({ className = 'size-5' }: P) => (
+  <svg {...base} className={className}><circle cx="9" cy="8" r="3.5" /><path d="M2.5 20a6.5 6.5 0 0113 0" /><circle cx="17" cy="9" r="2.5" /><path d="M16 14.2a5 5 0 016 4.8" /></svg>
+)

@@ -3,6 +3,7 @@ import { Navigate, Route, Routes, useLocation, useParams } from 'react-router-do
 import { useCity } from './lib/city'
 import About from './pages/About'
 import CityPicker from './pages/CityPicker'
+import FriendsPage from './pages/FriendsPage'
 import Home from './pages/Home'
 import InsightsPage from './pages/InsightsPage'
 import { Privacy, Terms } from './pages/Legal'
@@ -36,6 +37,7 @@ export default function App() {
       <Route path="/proposals/new" element={needsCity(<NewProposal />)} />
       <Route path="/signin" element={<SignIn />} />
       <Route path="/about" element={<About />} />
+      <Route path="/friends" element={<FriendsPage />} />
       <Route path="/privacy" element={<Privacy />} />
       <Route path="/terms" element={<Terms />} />
       <Route path="*" element={<NotFound />} />

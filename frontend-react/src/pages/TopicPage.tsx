@@ -1,7 +1,9 @@
 import { motion } from 'framer-motion'
 import { Link, useParams } from 'react-router-dom'
-import { useEffect } from 'react'
-import { Chart, ChevronRight, Lock, Share } from '../components/Icons'
+import { useEffect, useState } from 'react'
+import { AnalysisSheet } from '../components/AnalysisSheet'
+import { Book, Chart, ChevronRight, Lock, Send, Share } from '../components/Icons'
+import { SendSheet } from '../components/SendSheet'
 import { SponsorLabel } from '../components/Sponsored'
 import { useToast } from '../components/Toast'
 import { TopBar } from '../components/TopBar'
@@ -25,6 +27,8 @@ export default function TopicPage() {
   const { user, complete } = useAuth()
   const { t, l } = useI18n()
   const toast = useToast()
+  const [analysing, setAnalysing] = useState(false)
+  const [sending, setSending] = useState(false)
 
   // Arriving from a QR code counts as choosing the topic's city.
   useEffect(() => {
@@ -57,6 +61,17 @@ export default function TopicPage() {
               <Eyebrow topic={topic} />
               <h1 className="mt-3 text-[30px] font-bold leading-[1.12] tracking-[-0.02em]">{l(topic.question)}</h1>
               <p className="mt-3 text-[17px] leading-relaxed text-ink-2">{l(topic.context)}</p>
+              {topic.analysis && (
+                <button
+                  onClick={() => setAnalysing(true)}
+                  className="mt-4 flex w-full items-center gap-3 rounded-[18px] bg-card px-4 py-3 text-left active:bg-fill"
+                >
+                  <span className="grid size-8 place-items-center rounded-[9px] bg-fill text-ink-2"><Book className="size-[18px]" /></span>
+                  <span className="flex-1 text-[16px] font-medium">{t('fullAnalysis')}</span>
+                  <ChevronRight className="size-4 text-ink-3" />
+                </button>
+              )}
+              <AnalysisSheet topic={topic} open={analysing} onClose={() => setAnalysing(false)} />
             </motion.section>
 
             <motion.section
@@ -91,8 +106,14 @@ export default function TopicPage() {
                   <span className="flex-1 text-[16px] font-medium">{t('share')}</span>
                   <ChevronRight className="size-4 text-ink-3" />
                 </button>
+                <button onClick={() => setSending(true)} className="flex w-full items-center gap-3 px-4 py-3.5 text-left active:bg-fill">
+                  <span className="grid size-8 place-items-center rounded-[9px] bg-fill text-ink"><Send className="size-[18px]" /></span>
+                  <span className="flex-1 text-[16px] font-medium">{t('sendToFriend')}</span>
+                  <ChevronRight className="size-4 text-ink-3" />
+                </button>
               </motion.div>
             )}
+            <SendSheet topic={topic} mine={mine[topic.id]} open={sending} onClose={() => setSending(false)} />
 
             {voted && (
               <motion.section initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.4 }} className="mt-10">

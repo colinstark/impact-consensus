@@ -49,6 +49,8 @@ export interface Topic {
    */
   headlineYesShare?: number
   sources: Source[]
+  /** The analyser's full breakdown of the source article; only loaded on the topic page. */
+  analysis?: Analysis
   /** Sponsored questions are never shown in the top three and never block unlocking. */
   sponsor?: Sponsor
   /** Set when the topic came from a community proposal that reached 100 upvotes. */
@@ -167,4 +169,79 @@ export interface Api {
   getMyUpvotes(deviceId: string): Promise<Record<string, Choice>>
 
   requestMagicLink(email: string): Promise<void>
+}
+
+/**
+ * The article analyser's output (see supabase/functions/article-analyzer/prompt.ts).
+ * Written by a model, so every field may be missing or null.
+ */
+type Maybe<T> = T | null | undefined
+export type Tier = Maybe<string>
+
+export interface Analysis {
+  analysis_viability?: Maybe<'full' | 'partial' | 'insufficient'>
+  provenance?: Maybe<{
+    outlet?: Maybe<string>
+    author?: Maybe<string>
+    published?: Maybe<string>
+    language?: Maybe<string>
+    content_type?: Maybe<string>
+    geographic_scope?: Maybe<string>
+  }>
+  integrity_flags?: Maybe<{ flag?: Maybe<string>; detail?: Maybe<string> }[]>
+  factual_spine?: Maybe<{
+    summary?: Maybe<string>
+    actors?: Maybe<{ name?: Maybe<string>; role?: Maybe<string>; authority?: Maybe<string> }[]>
+    timeline?: Maybe<{ date?: Maybe<string>; event?: Maybe<string>; tier?: Tier }[]>
+    quantities?: Maybe<{
+      value?: Maybe<string>
+      unit?: Maybe<string>
+      denominator?: Maybe<string>
+      period?: Maybe<string>
+      source?: Maybe<string>
+      tier?: Tier
+    }[]>
+    stated_mechanism?: Maybe<string>
+  }>
+  bias_analysis?: Maybe<{
+    categories?: Maybe<{
+      category?: Maybe<string>
+      observation?: Maybe<string>
+      evidence?: Maybe<string>
+      favours?: Maybe<string>
+      strength?: Maybe<string>
+    }[]>
+    voices_present?: Maybe<string[]>
+    voices_absent?: Maybe<string[]>
+    overall_direction?: Maybe<string>
+    confidence?: Maybe<string>
+  }>
+  decisions?: Maybe<AnalysisDecision[]>
+  missing_information?: Maybe<{ item?: Maybe<string>; why_it_matters?: Maybe<string> }[]>
+}
+
+export interface AnalysisDecision {
+  id?: Maybe<string>
+  description?: Maybe<string>
+  status?: Maybe<string>
+  decision_maker?: Maybe<string>
+  ledger?: Maybe<{
+    advantages?: Maybe<{ effect?: Maybe<string>; accrues_to?: Maybe<string>; magnitude?: Maybe<string>; horizon?: Maybe<string>; tier?: Tier }[]>
+    disadvantages?: Maybe<{ effect?: Maybe<string>; borne_by?: Maybe<string>; magnitude?: Maybe<string>; horizon?: Maybe<string>; tier?: Tier }[]>
+    contested?: Maybe<{ question?: Maybe<string>; position_a?: Maybe<string>; position_b?: Maybe<string> }[]>
+    conditional?: Maybe<{ effect?: Maybe<string>; condition?: Maybe<string> }[]>
+    symmetry_note?: Maybe<string>
+  }>
+  economic_byproducts?: Maybe<{
+    direct_fiscal?: Maybe<Record<string, Maybe<string>>>
+    incidence?: Maybe<{ statutory_payer?: Maybe<string>; economic_bearer?: Maybe<string>; shift_mechanism?: Maybe<string>; tier?: Tier }>
+    distribution?: Maybe<{ group?: Maybe<string>; net_effect?: Maybe<string>; direction?: Maybe<string> }[]>
+    behavioural_response?: Maybe<{ response?: Maybe<string>; actor?: Maybe<string>; assumption?: Maybe<string> }[]>
+    market_effects?: Maybe<{ market?: Maybe<string>; effect?: Maybe<string>; tier?: Tier }[]>
+    externalities?: Maybe<{ effect?: Maybe<string>; party?: Maybe<string>; sign?: Maybe<string>; priced?: Maybe<boolean> }[]>
+    opportunity_cost?: Maybe<{ resource?: Maybe<string>; alternative_use?: Maybe<string>; tier?: Tier }>
+    time_profile?: Maybe<{ immediate?: Maybe<string>; medium_1_3y?: Maybe<string>; long_5y_plus?: Maybe<string>; mismatch_note?: Maybe<string> }>
+    second_order?: Maybe<{ byproduct?: Maybe<string>; pathway?: Maybe<string>; tier?: Tier }[]>
+    uncertainty?: Maybe<{ key_assumptions?: Maybe<string[]>; most_load_bearing?: Maybe<string>; data_gaps?: Maybe<string[]> }>
+  }>
 }
