@@ -8,10 +8,12 @@ import { useVotes } from '../lib/votes'
 import { ArrowUp, Check, Clock, Pin } from './Icons'
 import { useToast } from './Toast'
 
-export function ProposalCard({ proposal: p, myAnswer, onUpvote }: {
+export function ProposalCard({ proposal: p, myAnswer, onUpvote, linked = true }: {
   proposal: Proposal
   myAnswer?: Choice
   onUpvote: (id: string, a: Choice) => Promise<Proposal>
+  /** Makes the whole card open the proposal's page. Off on that page itself. */
+  linked?: boolean
 }) {
   const { t, n } = useI18n()
   const toast = useToast()
@@ -41,8 +43,10 @@ export function ProposalCard({ proposal: p, myAnswer, onUpvote }: {
       layout
       initial={{ opacity: 0, y: 12 }}
       animate={{ opacity: 1, y: 0 }}
-      className={`rounded-[22px] bg-card p-5 ${p.status === 'expired' ? 'opacity-60' : ''}`}
+      className={`relative rounded-[22px] bg-card p-5 ${p.status === 'expired' ? 'opacity-60' : ''}`}
     >
+      {/* Covers the card; the buttons and links below sit above it so they still get their taps. */}
+      {linked && <Link to={`/p/${p.id}`} aria-label={p.question} className="absolute inset-0 rounded-[22px]" />}
       <div className="flex items-center justify-between gap-2 text-[13px] font-medium text-ink-3">
         <span className="flex items-center gap-1.5"><Pin /> {p.area}</span>
         {p.status === 'open' && (
@@ -77,7 +81,7 @@ export function ProposalCard({ proposal: p, myAnswer, onUpvote }: {
       </div>
 
       {p.status === 'accepted' && p.topicSlug ? (
-        <Link to={`/t/${p.topicSlug}`} className="mt-4 flex h-12 items-center justify-center rounded-2xl bg-ink text-[16px] font-semibold text-bg">
+        <Link to={`/t/${p.topicSlug}`} className="relative mt-4 flex h-12 items-center justify-center rounded-2xl bg-ink text-[16px] font-semibold text-bg">
           {t('openTopic')}
         </Link>
       ) : myAnswer ? (
@@ -88,7 +92,7 @@ export function ProposalCard({ proposal: p, myAnswer, onUpvote }: {
           {t('upvoted', { a: myAnswer === 'yes' ? t('yes') : t('no') })}
         </p>
       ) : p.status === 'open' ? (
-        <div className="mt-4">
+        <div className="relative mt-4">
           <p className="mb-2 flex items-center gap-1.5 text-[13px] font-medium text-ink-3">
             <ArrowUp className="size-3.5" /> {t('upvoteWith')}
           </p>

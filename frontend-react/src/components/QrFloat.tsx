@@ -2,7 +2,6 @@ import { AnimatePresence, motion } from 'framer-motion'
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
 import { encode } from 'uqr'
-import type { Topic } from '../api/types'
 import { useI18n } from '../lib/i18n'
 
 // A QR code for the current question, floating bottom right, so a screen or a laptop at an
@@ -23,12 +22,12 @@ function initialOpen() {
   return window.matchMedia('(min-width: 640px)').matches
 }
 
-export function QrFloat({ topic }: { topic: Topic }) {
-  const { t, l } = useI18n()
+export function QrFloat({ path, title }: { path: string; title: string }) {
+  const { t } = useI18n()
   const [open, setOpenState] = useState(initialOpen)
   const [big, setBig] = useState(false)
   const screen = useRef<HTMLDivElement>(null)
-  const url = `${location.origin}/t/${topic.slug}?src=qr`
+  const url = `${location.origin}${path}?src=qr`
 
   const setOpen = (v: boolean) => {
     setOpenState(v)
@@ -132,7 +131,7 @@ export function QrFloat({ topic }: { topic: Topic }) {
               >
                 <Minimize />
               </button>
-              <p className="max-w-3xl text-[clamp(22px,4vw,44px)] font-bold leading-tight tracking-tight">{l(topic.question)}</p>
+              <p className="max-w-3xl text-[clamp(22px,4vw,44px)] font-bold leading-tight tracking-tight">{title}</p>
               <div className="w-[min(68vh,85vw)]">
                 <Code url={url} />
               </div>

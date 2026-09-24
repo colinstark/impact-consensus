@@ -9,6 +9,7 @@ import InsightsPage from './pages/InsightsPage'
 import { Privacy, Terms } from './pages/Legal'
 import NewProposal from './pages/NewProposal'
 import NotFound from './pages/NotFound'
+import ProposalPage from './pages/ProposalPage'
 import ProposalsPage from './pages/ProposalsPage'
 import SignIn from './pages/SignIn'
 import TopicPage from './pages/TopicPage'
@@ -20,7 +21,7 @@ export default function App() {
     window.scrollTo(0, 0)
   }, [pathname])
 
-  // First visit: ask for a city. QR deep links (/t/...) skip this; the topic sets the city.
+  // First visit: ask for a city. QR deep links (/t/..., /p/...) skip this; the topic sets the city.
   const needsCity = (el: React.ReactElement) =>
     city ? el : <Navigate to={`/city?next=${encodeURIComponent(pathname)}`} replace />
 
@@ -33,6 +34,7 @@ export default function App() {
       {/* Older links: the barrio map and trend now live on the insights page. */}
       <Route path="/t/:slug/trend" element={<ToInsights />} />
       <Route path="/t/:slug/barrios" element={<ToInsights />} />
+      <Route path="/p/:id" element={<ProposalPage />} />
       <Route path="/proposals" element={needsCity(<ProposalsPage />)} />
       <Route path="/proposals/new" element={needsCity(<NewProposal />)} />
       <Route path="/signin" element={<SignIn />} />

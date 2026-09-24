@@ -14,7 +14,7 @@ import { useAuth } from '../lib/auth'
 import { useCity } from '../lib/city'
 import { nextTopics } from '../lib/feed'
 import { useI18n } from '../lib/i18n'
-import { shareTopic } from '../lib/share'
+import { shareLink } from '../lib/share'
 import { useTopic, useTopics } from '../lib/useTopics'
 import { useVotes } from '../lib/votes'
 import NotFound from './NotFound'
@@ -99,7 +99,7 @@ export default function TopicPage() {
                 </Link>
                 <button
                   onClick={async () => {
-                    if ((await shareTopic(l(topic.question), topic.slug)) === 'copied') toast(t('copied'))
+                    if ((await shareLink(l(topic.question), `/t/${topic.slug}`)) === 'copied') toast(t('copied'))
                   }}
                   className="flex w-full items-center gap-3 px-4 py-3.5 text-left active:bg-fill"
                 >
@@ -115,7 +115,7 @@ export default function TopicPage() {
               </motion.div>
             )}
             <SendSheet topic={topic} mine={mine[topic.id]} open={sending} onClose={() => setSending(false)} />
-            <QrFloat topic={topic} />
+            <QrFloat path={`/t/${topic.slug}`} title={l(topic.question)} />
 
             {voted && (
               <motion.section initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.4 }} className="mt-10">

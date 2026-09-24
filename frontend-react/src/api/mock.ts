@@ -315,6 +315,13 @@ export const mockApi: Api = {
       .sort((a, b) => order[a.status] - order[b.status] || b.upvotes - a.upvotes)
   },
 
+  async getProposal(id) {
+    await delay()
+    const s = load()
+    const p = allStoredProposals(s).find((x) => x.id === id)
+    return p ? materialise(p, s) : null
+  },
+
   async createProposal(input, deviceId) {
     await delay(400)
     const s = load()

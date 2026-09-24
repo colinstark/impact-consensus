@@ -20,6 +20,7 @@ All bodies are JSON. Types (`Topic`, `Tally`, `Choice`, `TrendPoint`) are define
 | PUT | `/profile` | `UserProfile` + `deviceId` | **204** |
 | DELETE | `/profile` | `{ deviceId, email }` | **204**; GDPR erasure |
 | GET | `/proposals` | `?city=barcelona` | `Proposal[]` (open first, then accepted, then expired) |
+| GET | `/proposals/:id` | | `Proposal` or 404 |
 | POST | `/proposals` | `{ city, question, context?, area, answer, deviceId }` | `Proposal` |
 | PUT | `/proposals/:id/upvotes` | `{ answer: "yes" \| "no", deviceId }` | `Proposal` (updated) |
 | GET | `/devices/:deviceId/upvotes` | — | `{ [proposalId]: Choice }` |

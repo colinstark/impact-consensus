@@ -1,5 +1,5 @@
-export async function shareTopic(title: string, slug: string): Promise<'shared' | 'copied' | 'cancelled'> {
-  const url = `${location.origin}/t/${slug}`
+export async function shareLink(title: string, path: string): Promise<'shared' | 'copied' | 'cancelled'> {
+  const url = location.origin + path
   if (navigator.share) {
     try {
       await navigator.share({ title, url })

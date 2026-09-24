@@ -204,6 +204,7 @@ export function supabaseApi(db: SupabaseClient): Api {
 
     // Demo-only until there's a proposals table.
     listProposals: mockApi.listProposals,
+    getProposal: mockApi.getProposal,
     createProposal: mockApi.createProposal,
     upvoteProposal: mockApi.upvoteProposal,
     getMyUpvotes: mockApi.getMyUpvotes,

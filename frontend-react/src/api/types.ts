@@ -163,6 +163,7 @@ export interface Api {
   deleteProfile(deviceId: string, email: string): Promise<void>
 
   listProposals(city: string): Promise<Proposal[]>
+  getProposal(id: string): Promise<Proposal | null>
   createProposal(input: NewProposal, deviceId: string): Promise<Proposal>
   /** An upvote always comes with the voter's answer. One per device. */
   upvoteProposal(proposalId: string, answer: Choice, deviceId: string): Promise<Proposal>

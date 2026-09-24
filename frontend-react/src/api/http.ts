@@ -24,6 +24,7 @@ export function httpApi(base: string): Api {
     saveProfile: (deviceId, profile) => req('/profile', send('PUT', { ...profile, deviceId })),
     deleteProfile: (deviceId, email) => req('/profile', send('DELETE', { deviceId, email })),
     listProposals: (city) => req(`/proposals?city=${e(city)}`),
+    getProposal: (id) => req(`/proposals/${e(id)}`),
     createProposal: (input, deviceId) => req('/proposals', send('POST', { ...input, deviceId })),
     upvoteProposal: (id, answer, deviceId) => req(`/proposals/${e(id)}/upvotes`, send('PUT', { answer, deviceId })),
     getMyUpvotes: (deviceId) => req(`/devices/${e(deviceId)}/upvotes`),
