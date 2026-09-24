@@ -68,7 +68,8 @@ article {
 }
 .tally circle:hover { transform: scale(1.08); }
 .tally circle:active { transform: scale(0.94); }
-.tally circle:focus-visible { outline: none; stroke: var(--ink); stroke-width: 2; }
+.tally circle:focus { outline: none; }
+.tally circle:focus-visible { stroke: var(--ink); stroke-width: 2; }
 .tally .agree.mine { stroke: var(--agree); stroke-width: 2.5; }
 .tally .disagree.mine { stroke: var(--disagree); stroke-width: 2.5; }
 .tally .agree { fill: var(--agree-fill); }
