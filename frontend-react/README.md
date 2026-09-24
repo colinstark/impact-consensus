@@ -17,12 +17,12 @@ Runs on an in-browser mock by default. See [API.md](API.md) to connect the real 
 | `/city` | First-visit city picker (Barcelona only for now) |
 | `/` | Top 3 trending topics. Results stay hidden until you vote; answering all 3 unlocks the next 3. Community proposals below. |
 | `/t/:slug` | One topic. **QR codes should point here**, e.g. `/t/tourists-go-home?src=qr-rambla-01`. Skips the city picker. |
-| `/t/:slug/barrios` | Opinions by barrio: district heatmap. Asks for a postcode once. |
-| `/t/:slug/trend` | Opinion over time (sign-in required) |
+| `/t/:slug/insights` | Sign-up required. Timeline slider with play, overall donut, results by barrio (map), age or gender, and the opinion-over-time line chart |
 | `/proposals` | Community-proposed questions: 100 upvotes in 48 h adds one to the main list |
 | `/proposals/new` | Propose a question |
-| `/signin` | Email magic-link sign-in |
-| `/about` | About, plus sign-out |
+| `/signin` | Sign up (name, email, postcode, age, gender, consent) or sign in by email link |
+| `/privacy`, `/terms` | Draft GDPR privacy policy and terms (need legal review) |
+| `/about` | About, plus "Your data": sharing opt-in toggle, download, delete account |
 
 Voting is Yes / No. "I don't know — tell me more" opens the news coverage behind the topic and leaves Yes/No available.
 

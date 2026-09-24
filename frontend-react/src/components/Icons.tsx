@@ -63,3 +63,9 @@ export const ChevronDown = ({ className = 'size-4' }: P) => (
 export const Info = ({ className = 'size-4' }: P) => (
   <svg {...base} className={className}><circle cx="12" cy="12" r="9" /><path d="M12 11v5M12 8h.01" /></svg>
 )
+export const PlayIcon = ({ className = 'size-4' }: P) => (
+  <svg viewBox="0 0 24 24" aria-hidden className={className} fill="currentColor"><path d="M8 5.5v13a1 1 0 001.5.86l11-6.5a1 1 0 000-1.72l-11-6.5A1 1 0 008 5.5z" /></svg>
+)
+export const PauseIcon = ({ className = 'size-4' }: P) => (
+  <svg viewBox="0 0 24 24" aria-hidden className={className} fill="currentColor"><rect x="6" y="5" width="4" height="14" rx="1.2" /><rect x="14" y="5" width="4" height="14" rx="1.2" /></svg>
+)

@@ -1,5 +1,6 @@
 import { createContext, useContext, useState, type ReactNode } from 'react'
 import { api } from '../api'
+import { useAuth } from './auth'
 import { deviceId } from './device'
 
 // Home district from a postcode, asked for once. Only the district is shared
@@ -28,7 +29,10 @@ export function ProfileProvider({ children }: { children: ReactNode }) {
     localStorage.setItem(KEY, JSON.stringify(h))
     set(h)
   }
-  return <Ctx.Provider value={{ home, setHome }}>{children}</Ctx.Provider>
+  // A signed-up account's postcode counts as home too.
+  const { user } = useAuth()
+  const effective = home ?? (user?.postcode && user.districtId ? { postcode: user.postcode, districtId: user.districtId } : null)
+  return <Ctx.Provider value={{ home: effective, setHome }}>{children}</Ctx.Provider>
 }
 
 export function useProfile() {

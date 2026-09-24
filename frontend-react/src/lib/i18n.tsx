@@ -406,6 +406,256 @@ const strings = {
     es: 'Entendido',
     ca: 'Entesos',
   },
+  insights: {
+    en: 'Insights',
+    es: 'Análisis',
+    ca: 'Anàlisi',
+  },
+  insightsRow: {
+    en: 'Insights: barrio, age, gender & time',
+    es: 'Análisis: barrio, edad, género y tiempo',
+    ca: 'Anàlisi: barri, edat, gènere i temps',
+  },
+  viewBy: {
+    en: 'View results by',
+    es: 'Ver resultados por',
+    ca: 'Veure resultats per',
+  },
+  tabDistrict: {
+    en: 'Barrio',
+    es: 'Barrio',
+    ca: 'Barri',
+  },
+  tabAge: {
+    en: 'Age',
+    es: 'Edad',
+    ca: 'Edat',
+  },
+  tabGender: {
+    en: 'Gender',
+    es: 'Género',
+    ca: 'Gènere',
+  },
+  allTime: {
+    en: 'All time',
+    es: 'Todo el periodo',
+    ca: 'Tot el període',
+  },
+  asOf: {
+    en: 'As of {d}',
+    es: 'A fecha de {d}',
+    ca: 'A data de {d}',
+  },
+  play: {
+    en: 'Play',
+    es: 'Reproducir',
+    ca: 'Reproduir',
+  },
+  pause: {
+    en: 'Pause',
+    es: 'Pausa',
+    ca: 'Pausa',
+  },
+  questionAsked: {
+    en: 'Question asked',
+    es: 'Pregunta publicada',
+    ca: 'Pregunta publicada',
+  },
+  today: {
+    en: 'Today',
+    es: 'Hoy',
+    ca: 'Avui',
+  },
+  overall: {
+    en: 'Overall',
+    es: 'En total',
+    ca: 'En total',
+  },
+  showTrend: {
+    en: 'Show opinion over time',
+    es: 'Ver la opinión en el tiempo',
+    ca: 'Veure l’opinió en el temps',
+  },
+  hideTrend: {
+    en: 'Hide opinion over time',
+    es: 'Ocultar la opinión en el tiempo',
+    ca: 'Amagar l’opinió en el temps',
+  },
+  hiddenSmall: {
+    en: 'Fewer than 5 votes — hidden for privacy',
+    es: 'Menos de 5 votos: oculto por privacidad',
+    ca: 'Menys de 5 vots: amagat per privacitat',
+  },
+  noDemographics: {
+    en: 'No age or gender data for this question yet.',
+    es: 'Aún no hay datos de edad o género para esta pregunta.',
+    ca: 'Encara no hi ha dades d’edat o gènere per a aquesta pregunta.',
+  },
+  noVotesYet: {
+    en: 'No votes yet at this point.',
+    es: 'Aún no hay votos en este momento.',
+    ca: 'Encara no hi ha vots en aquest moment.',
+  },
+  aggregateNote: {
+    en: 'Only ever shown in aggregate. Groups with fewer than 5 votes are hidden.',
+    es: 'Siempre se muestra en conjunto. Se ocultan los grupos con menos de 5 votos.',
+    ca: 'Sempre es mostra en conjunt. S’amaguen els grups amb menys de 5 vots.',
+  },
+  ageU18: {
+    en: 'Under 18',
+    es: 'Menos de 18',
+    ca: 'Menys de 18',
+  },
+  preferNot: {
+    en: 'Prefer not to say',
+    es: 'Prefiero no decirlo',
+    ca: 'Prefereixo no dir-ho',
+  },
+  female: {
+    en: 'Female',
+    es: 'Mujer',
+    ca: 'Dona',
+  },
+  male: {
+    en: 'Male',
+    es: 'Hombre',
+    ca: 'Home',
+  },
+  nonBinary: {
+    en: 'Non-binary / prefer not to say',
+    es: 'No binario / prefiero no decirlo',
+    ca: 'No binari / prefereixo no dir-ho',
+  },
+  signUpTitle: {
+    en: 'Unlock insights',
+    es: 'Desbloquea el análisis',
+    ca: 'Desbloqueja l’anàlisi',
+  },
+  signUpBody: {
+    en: 'See how opinion splits by barrio, age and gender, and how it’s changed over time. Create a free account — your votes stay anonymous.',
+    es: 'Mira cómo se reparte la opinión por barrio, edad y género, y cómo ha cambiado con el tiempo. Crea una cuenta gratuita: tus votos siguen siendo anónimos.',
+    ca: 'Mira com es reparteix l’opinió per barri, edat i gènere, i com ha canviat amb el temps. Crea un compte gratuït: els teus vots continuen sent anònims.',
+  },
+  name: {
+    en: 'Name',
+    es: 'Nombre',
+    ca: 'Nom',
+  },
+  ageLabel: {
+    en: 'Age range',
+    es: 'Franja de edad',
+    ca: 'Franja d’edat',
+  },
+  genderLabel: {
+    en: 'Gender',
+    es: 'Género',
+    ca: 'Gènere',
+  },
+  choose: {
+    en: 'Choose…',
+    es: 'Elige…',
+    ca: 'Tria…',
+  },
+  agreeTerms: {
+    en: 'I agree to the {terms} and the {privacy}.',
+    es: 'Acepto las {terms} y la {privacy}.',
+    ca: 'Accepto les {terms} i la {privacy}.',
+  },
+  termsLink: {
+    en: 'Terms of use',
+    es: 'Condiciones de uso',
+    ca: 'Condicions d’ús',
+  },
+  privacyLink: {
+    en: 'Privacy Policy',
+    es: 'Política de privacidad',
+    ca: 'Política de privacitat',
+  },
+  shareLabel: {
+    en: 'Share my anonymised answers with third parties',
+    es: 'Compartir mis respuestas anonimizadas con terceros',
+    ca: 'Compartir les meves respostes anonimitzades amb tercers',
+  },
+  shareHelp: {
+    en: 'Optional. Researchers or the city council could see your answers linked only to your postcode area, age range and gender — never your name or email. Leave it unticked and your answers are only used in overall totals.',
+    es: 'Opcional. Investigadores o el Ayuntamiento podrían ver tus respuestas vinculadas solo a tu zona postal, franja de edad y género, nunca a tu nombre ni email. Si no lo marcas, tus respuestas solo se usan en los totales.',
+    ca: 'Opcional. Investigadors o l’Ajuntament podrien veure les teves respostes vinculades només a la teva zona postal, franja d’edat i gènere, mai al teu nom ni correu. Si no ho marques, les teves respostes només s’usen en els totals.',
+  },
+  createAccount: {
+    en: 'Create account',
+    es: 'Crear cuenta',
+    ca: 'Crear compte',
+  },
+  haveAccount: {
+    en: 'Already have an account? Sign in',
+    es: '¿Ya tienes cuenta? Entra',
+    ca: 'Ja tens compte? Entra',
+  },
+  newAccount: {
+    en: 'New here? Create an account',
+    es: '¿Eres nuevo? Crea una cuenta',
+    ca: 'Ets nou? Crea un compte',
+  },
+  fillAll: {
+    en: 'Please fill in every field.',
+    es: 'Rellena todos los campos.',
+    ca: 'Omple tots els camps.',
+  },
+  mustAgree: {
+    en: 'You need to agree to the terms to continue.',
+    es: 'Debes aceptar las condiciones para continuar.',
+    ca: 'Has d’acceptar les condicions per continuar.',
+  },
+  completeProfile: {
+    en: 'Finish setting up your account',
+    es: 'Completa tu cuenta',
+    ca: 'Completa el teu compte',
+  },
+  save: {
+    en: 'Save',
+    es: 'Guardar',
+    ca: 'Desar',
+  },
+  saved: {
+    en: 'Saved',
+    es: 'Guardado',
+    ca: 'Desat',
+  },
+  yourData: {
+    en: 'Your data',
+    es: 'Tus datos',
+    ca: 'Les teves dades',
+  },
+  shareToggle: {
+    en: 'Share anonymised answers with third parties',
+    es: 'Compartir respuestas anonimizadas con terceros',
+    ca: 'Compartir respostes anonimitzades amb tercers',
+  },
+  downloadData: {
+    en: 'Download my data',
+    es: 'Descargar mis datos',
+    ca: 'Baixar les meves dades',
+  },
+  deleteAccount: {
+    en: 'Delete my account and data',
+    es: 'Eliminar mi cuenta y mis datos',
+    ca: 'Eliminar el meu compte i les meves dades',
+  },
+  deleteConfirm: {
+    en: 'Delete your account? Your details are erased. Your past votes stay in the totals but are no longer linked to you.',
+    es: '¿Eliminar tu cuenta? Se borran tus datos. Tus votos pasados siguen en los totales, pero ya no están vinculados a ti.',
+    ca: 'Eliminar el teu compte? S’esborren les teves dades. Els teus vots anteriors continuen als totals, però ja no estan vinculats a tu.',
+  },
+  deleted: {
+    en: 'Account deleted',
+    es: 'Cuenta eliminada',
+    ca: 'Compte eliminat',
+  },
+  legalDraftNote: {
+    en: 'This policy is in English for now. Catalan and Spanish versions are coming.',
+    es: 'Por ahora esta política está en inglés. Pronto estará en catalán y castellano.',
+    ca: 'De moment aquesta política és en anglès. Aviat estarà en català i castellà.',
+  },
 } satisfies Record<string, Localized>
 
 export type StringKey = keyof typeof strings

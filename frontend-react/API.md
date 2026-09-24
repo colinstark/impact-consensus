@@ -16,8 +16,9 @@ All bodies are JSON. Types (`Topic`, `Tally`, `Choice`, `TrendPoint`) are define
 | PUT | `/topics/:id/votes` | `{ choice: "yes" \| "no", deviceId, source?, districtId? }` | `Tally` (updated counts) |
 | GET | `/devices/:deviceId/votes` | — | `{ [topicId]: Choice }` |
 | PATCH | `/devices/:deviceId` | `{ districtId }` | **204**; tags this device's past and future votes |
-| GET | `/topics/:id/districts` | — | `DistrictResult[]` (one per district, `"01"`–`"10"`) |
-| GET | `/topics/:id/trend` | `?range=1m\|3m\|all` | `TrendPoint[]` (daily, oldest first) |
+| GET | `/topics/:id/insights` | — | `Insights`: cumulative daily tallies overall and by district, age and gender |
+| PUT | `/profile` | `UserProfile` + `deviceId` | **204** |
+| DELETE | `/profile` | `{ deviceId, email }` | **204**; GDPR erasure |
 | GET | `/proposals` | `?city=barcelona` | `Proposal[]` (open first, then accepted, then expired) |
 | POST | `/proposals` | `{ city, question, context?, area, answer, deviceId }` | `Proposal` |
 | PUT | `/proposals/:id/upvotes` | `{ answer: "yes" \| "no", deviceId }` | `Proposal` (updated) |
@@ -48,6 +49,15 @@ All bodies are JSON. Types (`Topic`, `Tally`, `Choice`, `TrendPoint`) are define
   always labelled, and never required to unlock more topics (`src/lib/feed.ts`). Sponsors should only ever get
   the same public results as everyone else. With Supabase, the demo sponsored questions still come from the mock
   until there's a `sponsor` column or table.
+- **Insights** (`/t/:slug/insights`, sign-up required): every array in `Insights` lines up with `dates`, one entry
+  per day from the question's first vote to today, and holds running totals. This lets the page scrub and play
+  through time. The UI hides any group with fewer than 5 votes; the backend should apply the same rule before
+  returning data.
+- **Sign-up profile:** name, email, postcode (→ `districtId`), `ageBracket`, `gender` (`female` | `male` | `nb` =
+  non-binary / prefer not to say), `shareWithThirdParties` (opt-in, default **false**), `acceptedTermsAt`,
+  `consentVersion`. For the Supabase version this needs columns on `profiles` (or a new table). Until then, the
+  profile is kept in the browser, and real topics show district and time views but no age/gender.
+  **Never** export individual rows for users with `shareWithThirdParties = false`; only aggregates.
 - **Localised fields** (`question`, `context`, `category`) are `{ en, es, ca }` objects.
 - **Trend** `yesShare` = yes / (yes + no) cumulative up to that day; `votes` = cumulative yes + no.
 - **Magic link:** the email should link to the front end with a token. The front end currently keeps

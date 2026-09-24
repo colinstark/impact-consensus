@@ -1,7 +1,7 @@
 import type { SupabaseClient } from '@supabase/supabase-js'
 import { DISTRICTS } from '../data/districts'
 import { mockApi } from './mock'
-import type { Api, Choice, DistrictResult, Localized, Source, Tally, Topic, TrendPoint } from './types'
+import type { Api, Choice, Insights, Localized, Source, Tally, Topic } from './types'
 
 // Real backend: each analysed article in Supabase is a topic. Its `statement` is the
 // question people vote on and its `description` is the neutral context.
@@ -141,56 +141,52 @@ export function supabaseApi(db: SupabaseClient): Api {
     // doesn't give us, so the district is only kept on the device for now.
     setDistrict: mockApi.setDistrict,
 
-    async getDistrictResults(topicId) {
-      if (!isArticle(topicId)) return mockApi.getDistrictResults(topicId)
+    async getInsights(topicId) {
+      if (!isArticle(topicId)) return mockApi.getInsights(topicId)
       const { data, error } = await db
         .from('votes')
-        .select('stance, barrios(district)')
-        .eq('article_id', topicId)
-        .not('barrio_id', 'is', null)
-      if (error) throw error
-      const rows = data as unknown as { stance: 'agree' | 'disagree'; barrios: { district: string | null } | null }[]
-      return DISTRICTS.map(({ id, name }): DistrictResult => {
-        const here = rows.filter((r) => r.barrios?.district === name)
-        return { districtId: id, ...tallyOf(here) }
-      })
-    },
-
-    async getTrend(topicId, range) {
-      if (!isArticle(topicId)) return mockApi.getTrend(topicId, range)
-      const { data, error } = await db
-        .from('votes')
-        .select('stance, created_at')
+        .select('stance, created_at, barrios(district)')
         .eq('article_id', topicId)
         .order('created_at')
       if (error) throw error
-      if (!data.length) return []
+      const rows = data as unknown as {
+        stance: 'agree' | 'disagree'
+        created_at: string
+        barrios: { district: string | null } | null
+      }[]
+      const empty: Insights = { dates: [], overall: [], byDistrict: {}, byAge: {}, byGender: {} }
+      if (!rows.length) return empty
 
-      // Running totals per day, from the first vote to today.
-      const byDay = new Map<string, { yes: number; no: number }>()
-      for (const v of data) {
-        const day = v.created_at.slice(0, 10)
-        const d = byDay.get(day) ?? { yes: 0, no: 0 }
-        d[v.stance === 'agree' ? 'yes' : 'no'] += 1
-        byDay.set(day, d)
-      }
-      const points: TrendPoint[] = []
-      let yes = 0
-      let no = 0
+      // One entry per day from the first vote to today, with running totals.
       const today = new Date().toISOString().slice(0, 10)
-      for (const day = new Date(data[0].created_at.slice(0, 10)); ; day.setUTCDate(day.getUTCDate() + 1)) {
-        const date = day.toISOString().slice(0, 10)
-        const d = byDay.get(date)
-        if (d) {
-          yes += d.yes
-          no += d.no
-        }
-        points.push({ date, yesShare: yes / Math.max(1, yes + no), votes: yes + no })
+      const dates: string[] = []
+      for (const d = new Date(rows[0].created_at.slice(0, 10)); ; d.setUTCDate(d.getUTCDate() + 1)) {
+        const date = d.toISOString().slice(0, 10)
+        dates.push(date)
         if (date >= today) break
       }
-      const keep = range === '1m' ? 31 : range === '3m' ? 92 : points.length
-      return points.slice(-keep)
+      const idOf = Object.fromEntries(DISTRICTS.map((x) => [x.name, x.id]))
+      const running = (filter: (r: (typeof rows)[number]) => boolean): Tally[] => {
+        let i = 0
+        const t = { yes: 0, no: 0 }
+        const matching = rows.filter(filter)
+        return dates.map((date) => {
+          while (i < matching.length && matching[i].created_at.slice(0, 10) <= date) {
+            t[matching[i].stance === 'agree' ? 'yes' : 'no'] += 1
+            i++
+          }
+          return { ...t }
+        })
+      }
+      const byDistrict: Insights['byDistrict'] = {}
+      for (const { id } of DISTRICTS) byDistrict[id] = running((r) => idOf[r.barrios?.district ?? ''] === id)
+      // Age and gender aren't stored in the database yet, so those views stay empty.
+      return { ...empty, dates, overall: running(() => true), byDistrict }
     },
+
+    // Stored in the browser until profiles gain the sign-up fields (see API.md).
+    saveProfile: mockApi.saveProfile,
+    deleteProfile: mockApi.deleteProfile,
 
     // Demo-only until there's a proposals table.
     listProposals: mockApi.listProposals,

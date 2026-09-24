@@ -1,7 +1,7 @@
 import { motion } from 'framer-motion'
 import { Link, useParams } from 'react-router-dom'
 import { useEffect } from 'react'
-import { Chart, ChevronRight, Lock, MapIcon, Share } from '../components/Icons'
+import { Chart, ChevronRight, Lock, Share } from '../components/Icons'
 import { SponsorLabel } from '../components/Sponsored'
 import { useToast } from '../components/Toast'
 import { TopBar } from '../components/TopBar'
@@ -22,7 +22,7 @@ export default function TopicPage() {
   const { city, setCity } = useCity()
   const { topics } = useTopics(topic?.city ?? null)
   const { mine } = useVotes()
-  const { user } = useAuth()
+  const { user, complete } = useAuth()
   const { t, l } = useI18n()
   const toast = useToast()
 
@@ -75,15 +75,10 @@ export default function TopicPage() {
                 transition={{ delay: 0.3 }}
                 className="mt-4 divide-y divide-hair overflow-hidden rounded-[18px] bg-card"
               >
-                <Link to={`/t/${topic.slug}/barrios`} className="flex items-center gap-3 px-4 py-3.5 active:bg-fill">
-                  <span className="grid size-8 place-items-center rounded-[9px] bg-no text-white"><MapIcon className="size-[18px]" /></span>
-                  <span className="flex-1 text-[16px] font-medium">{t('byBarrio')}</span>
-                  <ChevronRight className="size-4 text-ink-3" />
-                </Link>
-                <Link to={`/t/${topic.slug}/trend`} className="flex items-center gap-3 px-4 py-3.5 active:bg-fill">
+                <Link to={`/t/${topic.slug}/insights`} className="flex items-center gap-3 px-4 py-3.5 active:bg-fill">
                   <span className="grid size-8 place-items-center rounded-[9px] bg-yes text-white"><Chart className="size-[18px]" /></span>
-                  <span className="flex-1 text-[16px] font-medium">{t('seeTrend')}</span>
-                  {!user && <Lock className="size-4 text-ink-3" />}
+                  <span className="flex-1 text-[16px] font-medium">{t('insightsRow')}</span>
+                  {!(user && complete) && <Lock className="size-4 text-ink-3" />}
                   <ChevronRight className="size-4 text-ink-3" />
                 </Link>
                 <button

@@ -92,3 +92,38 @@ button {
     transition-duration: 0.01ms !important;
   }
 }
+
+/* iOS-style slider for the insights timeline. --p is the filled share. */
+input.timeline {
+  -webkit-appearance: none;
+  appearance: none;
+  height: 28px;
+  background: transparent;
+}
+input.timeline::-webkit-slider-runnable-track {
+  height: 4px;
+  border-radius: 999px;
+  background: linear-gradient(to right, var(--ink) var(--p), var(--fill-2) var(--p));
+}
+input.timeline::-moz-range-track {
+  height: 4px;
+  border-radius: 999px;
+  background: linear-gradient(to right, var(--ink) var(--p), var(--fill-2) var(--p));
+}
+input.timeline::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  margin-top: -10px;
+  width: 24px;
+  height: 24px;
+  border-radius: 999px;
+  background: #fff;
+  box-shadow: 0 0 0 0.5px rgb(0 0 0 / 0.08), 0 3px 8px rgb(0 0 0 / 0.18);
+}
+input.timeline::-moz-range-thumb {
+  width: 24px;
+  height: 24px;
+  border: none;
+  border-radius: 999px;
+  background: #fff;
+  box-shadow: 0 0 0 0.5px rgb(0 0 0 / 0.08), 0 3px 8px rgb(0 0 0 / 0.18);
+}

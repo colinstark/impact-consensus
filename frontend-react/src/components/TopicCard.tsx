@@ -50,11 +50,11 @@ export function TopicCard({ topic, index = 0 }: { topic: Topic; index?: number }
       </div>
       {mine[topic.id] && (
         <Link
-          to={`/t/${topic.slug}/barrios`}
+          to={`/t/${topic.slug}/insights`}
           className="mt-4 flex items-center gap-2 border-t border-hair pt-3.5 text-[15px] font-medium text-yes"
         >
           <MapIcon className="size-[18px]" />
-          <span className="flex-1">{t('byBarrio')}</span>
+          <span className="flex-1">{t('insightsRow')}</span>
           <ChevronRight className="size-4" />
         </Link>
       )}

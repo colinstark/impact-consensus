@@ -110,8 +110,37 @@ export interface VoteInput {
   districtId?: string
 }
 
-export interface User {
+export type AgeBracket = 'u18' | '18-24' | '25-34' | '35-44' | '45-54' | '55-64' | '65+' | 'na'
+/** "nb" = non-binary / prefer not to say, one option by design. */
+export type Gender = 'female' | 'male' | 'nb'
+
+/** Collected at sign-up to unlock insights. */
+export interface UserProfile {
+  name: string
   email: string
+  postcode: string
+  districtId: string
+  ageBracket: AgeBracket
+  gender: Gender
+  /** Opt-in only, off by default. Without it, answers are only ever used in aggregate. */
+  shareWithThirdParties: boolean
+  acceptedTermsAt: string
+  /** Version of the terms/privacy policy they agreed to. */
+  consentVersion: string
+}
+
+export type User = { email: string } & Partial<UserProfile>
+
+/**
+ * Cumulative daily tallies for a topic, overall and per group, so the insights
+ * timeline can show any day. Every array lines up with `dates`.
+ */
+export interface Insights {
+  dates: string[]
+  overall: Tally[]
+  byDistrict: Record<string, Tally[]>
+  byAge: Partial<Record<AgeBracket, Tally[]>>
+  byGender: Partial<Record<Gender, Tally[]>>
 }
 
 export interface Api {
@@ -123,8 +152,13 @@ export interface Api {
   getMyVotes(deviceId: string): Promise<Record<string, Choice>>
   /** Tags this device's existing and future votes with a home district. */
   setDistrict(deviceId: string, districtId: string): Promise<void>
-  getDistrictResults(topicId: string): Promise<DistrictResult[]>
-  getTrend(topicId: string, range: TrendRange): Promise<TrendPoint[]>
+  /** Everything the insights page needs: overall, by district, age and gender, per day. */
+  getInsights(topicId: string): Promise<Insights>
+
+  /** Stores the sign-up profile. Demographics are only ever published in aggregate. */
+  saveProfile(deviceId: string, profile: UserProfile): Promise<void>
+  /** GDPR erasure: deletes the profile and unlinks this device's votes from it. */
+  deleteProfile(deviceId: string, email: string): Promise<void>
 
   listProposals(city: string): Promise<Proposal[]>
   createProposal(input: NewProposal, deviceId: string): Promise<Proposal>

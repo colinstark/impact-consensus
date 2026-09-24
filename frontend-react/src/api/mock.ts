@@ -1,6 +1,6 @@
 import { DISTRICTS, DISTRICT_WEIGHT } from '../data/districts'
 import { coverage, seedTopics, sponsoredTopics } from './seed'
-import type { Api, Choice, DistrictResult, Proposal, Tally, Topic, TrendPoint } from './types'
+import type { AgeBracket, Api, Choice, Gender, Insights, Proposal, Tally, Topic, TrendPoint } from './types'
 
 // In-browser stand-in for the backend. Everything persists in localStorage so
 // the demo behaves like the real thing on a single device.
@@ -18,6 +18,7 @@ interface StoredProposal extends Omit<Proposal, 'upvotes' | 'tally' | 'status' |
 interface Store {
   votes: Record<string, Record<string, Choice>> // deviceId -> topicId -> choice
   districts: Record<string, string> // deviceId -> districtId
+  profiles?: Record<string, { ageBracket: AgeBracket; gender: Gender }> // deviceId -> demographics
   upvotes: Record<string, Record<string, Choice>> // deviceId -> proposalId -> answer
   proposals: StoredProposal[] // created on this device
   accepted: string[] // proposal ids promoted to topics
@@ -151,19 +152,6 @@ const DISTRICT_BIAS: Record<string, Record<string, number>> = {
   bunkers: { '07': 0.2, '06': 0.06 },
 }
 
-function seededDistricts(topic: Topic): DistrictResult[] {
-  const rand = rng(`${topic.id}:districts`)
-  const n = total(topic.tally)
-  const share = topic.tally.yes / Math.max(1, n)
-  return DISTRICTS.map(({ id }) => {
-    const bias = DISTRICT_BIAS[topic.id]?.[id] ?? 0
-    const s = Math.min(0.95, Math.max(0.05, share + bias + (rand() - 0.5) * 0.14))
-    const votes = Math.max(3, Math.round(n * DISTRICT_WEIGHT[id] * (0.75 + rand() * 0.5)))
-    const yes = Math.round(votes * s)
-    return { districtId: id, yes, no: votes - yes }
-  })
-}
-
 function history(topic: Topic): TrendPoint[] {
   const rand = rng(topic.id)
   const start = new Date(topic.createdAt)
@@ -188,6 +176,68 @@ function history(topic: Topic): TrendPoint[] {
   }
   points[points.length - 1].yesShare = finalShare
   return points
+}
+
+const AGE_WEIGHT: [AgeBracket, number][] = [
+  ['u18', 0.04], ['18-24', 0.14], ['25-34', 0.22], ['35-44', 0.2], ['45-54', 0.17], ['55-64', 0.13], ['65+', 0.1],
+]
+const GENDER_WEIGHT: [Gender, number][] = [['female', 0.5], ['male', 0.46], ['nb', 0.04]]
+
+/** Cumulative daily tallies for one group, drifting around the overall share by `offset`. */
+function groupSeries(points: TrendPoint[], weight: number, offset: number): Tally[] {
+  let yes = 0
+  let no = 0
+  return points.map((pt) => {
+    const votes = Math.round(pt.votes * weight)
+    const y = Math.round(votes * Math.min(0.97, Math.max(0.03, pt.yesShare + offset)))
+    // Cumulative counts never go down as the timeline plays.
+    yes = Math.max(yes, y)
+    no = Math.max(no, votes - y)
+    return { yes, no }
+  })
+}
+
+function insightsFor(topic: Topic, s: Store): Insights {
+  const points = history(withLocalVotes(topic, s))
+  const rand = rng(`${topic.id}:groups`)
+  const byDistrict: Insights['byDistrict'] = {}
+  for (const { id } of DISTRICTS) {
+    const offset = (DISTRICT_BIAS[topic.id]?.[id] ?? 0) + (rand() - 0.5) * 0.12
+    byDistrict[id] = groupSeries(points, DISTRICT_WEIGHT[id] * (0.8 + rand() * 0.4), offset)
+  }
+  // Younger and older residents lean opposite ways, by a topic-specific amount.
+  const slope = (rand() - 0.5) * 0.3
+  const byAge: Insights['byAge'] = {}
+  AGE_WEIGHT.forEach(([age, w], i) => {
+    byAge[age] = groupSeries(points, w, slope * ((i - 3) / 3) + (rand() - 0.5) * 0.06)
+  })
+  const gap = (rand() - 0.5) * 0.14
+  const byGender: Insights['byGender'] = {}
+  for (const [g, w] of GENDER_WEIGHT) {
+    byGender[g] = groupSeries(points, w, g === 'female' ? gap : g === 'male' ? -gap * 0.9 : (rand() - 0.5) * 0.2)
+  }
+  // Put this browser's votes into its own groups on the latest day.
+  for (const [device, votes] of Object.entries(s.votes)) {
+    const c = votes[topic.id]
+    if (!c) continue
+    const bump = (series?: Tally[]) => series && (series[series.length - 1][c] += 1)
+    bump(byDistrict[s.districts[device]])
+    const prof = s.profiles?.[device]
+    if (prof) {
+      bump(byAge[prof.ageBracket])
+      bump(byGender[prof.gender])
+    }
+  }
+  return {
+    dates: points.map((p) => p.date),
+    overall: points.map((p) => {
+      const yes = Math.round(p.votes * p.yesShare)
+      return { yes, no: p.votes - yes }
+    }),
+    byDistrict,
+    byAge,
+    byGender,
+  }
 }
 
 const findTopic = (s: Store, id: string) => allTopics(s).find((t) => t.id === id)
@@ -231,28 +281,28 @@ export const mockApi: Api = {
     save(s)
   },
 
-  async getDistrictResults(topicId) {
+  async getInsights(topicId) {
     await delay()
     const s = load()
     const t = findTopic(s, topicId)
-    if (!t) return []
-    const rows = seededDistricts(t)
-    for (const [device, votes] of Object.entries(s.votes)) {
-      const c = votes[topicId]
-      const row = rows.find((r) => r.districtId === s.districts[device])
-      if (c && row) row[c] += 1
-    }
-    return rows
+    if (!t) return { dates: [], overall: [], byDistrict: {}, byAge: {}, byGender: {} }
+    return insightsFor(t, s)
   },
 
-  async getTrend(topicId, range) {
-    await delay()
+  async saveProfile(deviceId, profile) {
+    await delay(300)
     const s = load()
-    const t = findTopic(s, topicId)
-    if (!t) return []
-    const pts = history(withLocalVotes(t, s))
-    const keep = range === '1m' ? 31 : range === '3m' ? 92 : pts.length
-    return pts.slice(-keep)
+    s.districts[deviceId] = profile.districtId
+    s.profiles = { ...s.profiles, [deviceId]: { ageBracket: profile.ageBracket, gender: profile.gender } }
+    save(s)
+  },
+
+  async deleteProfile(deviceId) {
+    await delay(300)
+    const s = load()
+    delete s.districts[deviceId]
+    if (s.profiles) delete s.profiles[deviceId]
+    save(s)
   },
 
   async listProposals(city) {
