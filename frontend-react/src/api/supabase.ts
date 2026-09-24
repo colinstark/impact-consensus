@@ -1,13 +1,13 @@
 import type { SupabaseClient } from '@supabase/supabase-js'
 import { DISTRICTS } from '../data/districts'
 import { mockApi } from './mock'
-import type { AgeBracket, Analysis, Api, Choice, Gender, Insights, Localized, Source, Tally, Topic } from './types'
+import type { AgeBracket, Analysis, Api, Choice, Gender, Insights, Localized, Proposal, Source, Tally, Topic } from './types'
 
 // Real backend: each analysed article in Supabase is a topic. Its `statement` is the
 // question people vote on and its `description` is the neutral context.
 // Enabled by setting VITE_SUPABASE_URL and VITE_SUPABASE_PUBLISHABLE_KEY.
 //
-// Features without tables yet (proposals, sponsored questions, postcode → district)
+// Features without tables yet (sponsored questions, postcode → district)
 // fall back to the in-browser mock, so they keep working on the live demo. Their ids
 // are never numeric, so they can't collide with article ids.
 
@@ -30,6 +30,43 @@ const COLUMNS =
   'id, url, title, statement, description, location, created_at, published_at, votes(stance), article_topics(topics(name))'
 
 const isArticle = (id: string) => /^\d+$/.test(id)
+
+// Accepted community proposals become articles with a placeholder url (see the proposals migration).
+const fromProposal = (url: string) => url.startsWith('placa:proposal/')
+
+type ProposalRow = {
+  id: string
+  city: string
+  question: string
+  context: string | null
+  area: string
+  created_at: string
+  expires_at: string
+  article_id: number | null
+  upvotes: number
+  yes: number
+  no: number
+  status: Proposal['status']
+}
+
+function toProposal(r: ProposalRow): Proposal {
+  return {
+    id: r.id,
+    city: r.city,
+    question: r.question,
+    context: r.context ?? undefined,
+    area: r.area,
+    upvotes: r.upvotes,
+    tally: { yes: r.yes, no: r.no },
+    createdAt: r.created_at,
+    expiresAt: r.expires_at,
+    status: r.status,
+    topicSlug: r.article_id ? String(r.article_id) : undefined,
+  }
+}
+
+const answerOf = (stance: 'agree' | 'disagree'): Choice => (stance === 'agree' ? 'yes' : 'no')
+const stanceOf = (answer: Choice) => (answer === 'yes' ? 'agree' : 'disagree')
 
 // Statements are written in one language; show the same text in every UI language.
 const same = (text: string): Localized => ({ en: text, es: text, ca: text })
@@ -64,7 +101,8 @@ function toTopic(row: Row): Topic {
     question: same(row.statement),
     context: same(row.description ?? ''),
     tally: tallyOf(row.votes),
-    sources: [source],
+    sources: fromProposal(row.url) ? [] : [source],
+    fromProposal: fromProposal(row.url) || undefined,
     analysis: analysisOf(row) ?? undefined,
     createdAt: row.published_at ?? row.created_at,
   }
@@ -96,6 +134,24 @@ export function supabaseApi(db: SupabaseClient): Api {
     return tallyOf(data)
   }
 
+  async function getProposal(id: string) {
+    const { data, error } = await db.from('proposal_tallies').select('*').eq('id', id).maybeSingle()
+    if (error) throw error
+    return data ? toProposal(data as ProposalRow) : null
+  }
+
+  async function upvoteProposal(id: string, answer: Choice) {
+    await voter()
+    // One upvote per person; a repeat is ignored rather than an error.
+    const { error } = await db
+      .from('proposal_upvotes')
+      .upsert({ proposal_id: id, answer: stanceOf(answer) }, { onConflict: 'proposal_id,user_id', ignoreDuplicates: true })
+    if (error) throw error
+    const p = await getProposal(id)
+    if (!p) throw new Error('Unknown proposal')
+    return p
+  }
+
   return {
     async listTopics(city) {
       const [{ data, error }, local] = await Promise.all([
@@ -104,8 +160,8 @@ export function supabaseApi(db: SupabaseClient): Api {
       ])
       if (error) throw error
       const real = (data as unknown as Row[]).map(toTopic).filter((t) => t.city === city)
-      // Demo-only: sponsored questions and accepted proposals until they have tables.
-      const extra = local.filter((t) => t.sponsor || t.fromProposal)
+      // Demo-only: sponsored questions until they have a table.
+      const extra = local.filter((t) => t.sponsor)
       // Most-voted first; the newest wins a tie (sort keeps the date order).
       return [...real, ...extra].sort((a, b) => total(b.tally) - total(a.tally))
     },
@@ -202,12 +258,37 @@ export function supabaseApi(db: SupabaseClient): Api {
     saveProfile: mockApi.saveProfile,
     deleteProfile: mockApi.deleteProfile,
 
-    // Demo-only until there's a proposals table.
-    listProposals: mockApi.listProposals,
-    getProposal: mockApi.getProposal,
-    createProposal: mockApi.createProposal,
-    upvoteProposal: mockApi.upvoteProposal,
-    getMyUpvotes: mockApi.getMyUpvotes,
+    async listProposals(city) {
+      const { data, error } = await db.from('proposal_tallies').select('*').eq('city', city)
+      if (error) throw error
+      const order = { open: 0, accepted: 1, expired: 2 }
+      return (data as ProposalRow[])
+        .map(toProposal)
+        .sort((a, b) => order[a.status] - order[b.status] || b.upvotes - a.upvotes)
+    },
+
+    getProposal,
+
+    async createProposal(input) {
+      await voter()
+      const { data, error } = await db
+        .from('proposals')
+        .insert({ city: input.city, question: input.question, context: input.context || null, area: input.area })
+        .select('id')
+        .single()
+      if (error) throw error
+      return upvoteProposal(data.id, input.answer)
+    },
+
+    upvoteProposal,
+
+    async getMyUpvotes() {
+      const user = await currentUser()
+      if (!user) return {}
+      const { data, error } = await db.from('proposal_upvotes').select('proposal_id, answer').eq('user_id', user.id)
+      if (error) throw error
+      return Object.fromEntries(data.map((u) => [u.proposal_id, answerOf(u.answer)]))
+    },
 
     async requestMagicLink(email) {
       const { error } = await db.auth.signInWithOtp({

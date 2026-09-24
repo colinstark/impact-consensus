@@ -4,14 +4,16 @@ import type { Topic } from '../api/types'
 
 let channels = 0
 
+const ARTICLE_TABLES: [table: string, idColumn: string][] = [['articles', 'id'], ['votes', 'article_id'], ['article_analysis', 'article_id']]
+
 /**
- * Call `reload` when articles, votes or analyses change in Supabase, at most every
- * half second so a burst of votes is one refetch. Pass `articleId` to only listen to
- * that article, or null to not listen at all. Does nothing without Supabase.
+ * Call `reload` when any of `tables` change in Supabase (articles, votes and analyses by
+ * default), at most every half second so a burst of votes is one refetch. Pass `id` to
+ * only listen to that row, or null to not listen at all. Does nothing without Supabase.
  */
-function useLive(reload: () => void, articleId?: string | null) {
+export function useLive(reload: () => void, id?: string | null, tables = ARTICLE_TABLES) {
   useEffect(() => {
-    if (!supabase || articleId === null) return
+    if (!supabase || id === null) return
     let timer: ReturnType<typeof setTimeout> | undefined
     const later = () => {
       timer ??= setTimeout(() => {
@@ -23,20 +25,18 @@ function useLive(reload: () => void, articleId?: string | null) {
       event: '*' as const,
       schema: 'public',
       table,
-      ...(articleId && { filter: `${column}=eq.${articleId}` }),
+      ...(id && { filter: `${column}=eq.${id}` }),
     })
     // A unique name per mount, so a quick remount never reuses a channel that is still closing.
-    const channel = supabase
-      .channel(`live-${++channels}`)
-      .on('postgres_changes', on('articles', 'id'), later)
-      .on('postgres_changes', on('votes', 'article_id'), later)
-      .on('postgres_changes', on('article_analysis', 'article_id'), later)
-      .subscribe()
+    const channel = supabase.channel(`live-${++channels}`)
+    for (const [table, column] of tables) channel.on('postgres_changes', on(table, column), later)
+    channel.subscribe()
     return () => {
       clearTimeout(timer)
       supabase?.removeChannel(channel)
     }
-  }, [reload, articleId])
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- `tables` is a constant per caller
+  }, [reload, id])
 }
 
 /** `next` in the order of `prev`, new topics last, so live updates don't reshuffle the feed. */

@@ -1,16 +1,14 @@
-import { useEffect, useState } from 'react'
+import { useEffect } from 'react'
 import { Link, Navigate, useParams } from 'react-router-dom'
-import { api } from '../api'
-import type { Choice, Proposal } from '../api/types'
 import { ChevronRight, Share } from '../components/Icons'
 import { ProposalCard } from '../components/ProposalCard'
 import { QrFloat } from '../components/QrFloat'
 import { useToast } from '../components/Toast'
 import { TopBar } from '../components/TopBar'
 import { useCity } from '../lib/city'
-import { deviceId } from '../lib/device'
 import { useI18n } from '../lib/i18n'
 import { shareLink } from '../lib/share'
+import { useProposal } from '../lib/useProposals'
 import NotFound from './NotFound'
 
 export default function ProposalPage() {
@@ -18,13 +16,7 @@ export default function ProposalPage() {
   const { city, setCity } = useCity()
   const { t } = useI18n()
   const toast = useToast()
-  const [proposal, setProposal] = useState<Proposal | null>()
-  const [mine, setMine] = useState<Choice>()
-
-  useEffect(() => {
-    api.getProposal(id).then(setProposal)
-    api.getMyUpvotes(deviceId()).then((m) => setMine(m[id]))
-  }, [id])
+  const { proposal, mine, upvote } = useProposal(id)
 
   // Arriving from a QR code counts as choosing the proposal's city.
   useEffect(() => {
@@ -32,20 +24,8 @@ export default function ProposalPage() {
   }, [proposal, city, setCity])
 
   if (proposal === null) return <NotFound />
-  // Once accepted, the question lives on as a topic; old QR codes follow it there.
+  // Once accepted, the question lives on as a topic; old QR codes (and the projector) follow it there.
   if (proposal?.status === 'accepted' && proposal.topicSlug) return <Navigate to={`/t/${proposal.topicSlug}`} replace />
-
-  async function upvote(pid: string, answer: Choice) {
-    setMine(answer)
-    try {
-      const updated = await api.upvoteProposal(pid, answer, deviceId())
-      setProposal(updated)
-      return updated
-    } catch (e) {
-      setMine(undefined)
-      throw e
-    }
-  }
 
   return (
     <>
