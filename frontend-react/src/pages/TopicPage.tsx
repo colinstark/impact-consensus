@@ -3,6 +3,7 @@ import { Link, useParams } from 'react-router-dom'
 import { useEffect, useState } from 'react'
 import { AnalysisSheet } from '../components/AnalysisSheet'
 import { Book, Chart, ChevronRight, Lock, Send, Share } from '../components/Icons'
+import { QrFloat } from '../components/QrFloat'
 import { SendSheet } from '../components/SendSheet'
 import { SponsorLabel } from '../components/Sponsored'
 import { useToast } from '../components/Toast'
@@ -114,6 +115,7 @@ export default function TopicPage() {
               </motion.div>
             )}
             <SendSheet topic={topic} mine={mine[topic.id]} open={sending} onClose={() => setSending(false)} />
+            <QrFloat topic={topic} />
 
             {voted && (
               <motion.section initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.4 }} className="mt-10">
