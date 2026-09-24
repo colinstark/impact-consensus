@@ -726,8 +726,9 @@ const strings = {
   scanToVote: { en: 'Scan to vote', es: 'Escanea para votar', ca: 'Escaneja per votar' },
   hideQr: { en: 'Minimise QR code', es: 'Minimizar código QR', ca: 'Minimitzar el codi QR' },
   showQr: { en: 'Show QR code', es: 'Mostrar código QR', ca: 'Mostrar el codi QR' },
-  enlargeQr: { en: 'Show QR code full screen', es: 'Mostrar el código QR a pantalla completa', ca: 'Mostrar el codi QR a pantalla completa' },
+  enlargeQr: { en: 'Full screen', es: 'Pantalla completa', ca: 'Pantalla completa' },
   tapToClose: { en: 'Tap anywhere to close', es: 'Toca en cualquier sitio para cerrar', ca: 'Toca a qualsevol lloc per tancar' },
+  exitFullScreen: { en: 'Exit full screen', es: 'Salir de pantalla completa', ca: 'Sortir de la pantalla completa' },
 } satisfies Record<string, Localized>
 
 export type StringKey = keyof typeof strings
