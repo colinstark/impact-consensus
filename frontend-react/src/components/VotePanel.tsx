@@ -3,8 +3,8 @@ import { useEffect, useState } from 'react'
 import type { Choice, Tally, Topic } from '../api/types'
 import { useI18n } from '../lib/i18n'
 import { useVotes } from '../lib/votes'
-import { Book, Check, Lock } from './Icons'
-import { LockedResult, ResultBar } from './ResultBar'
+import { Book, Check } from './Icons'
+import { ResultBar } from './ResultBar'
 import { SourcesSheet } from './SourcesSheet'
 import { useToast } from './Toast'
 
@@ -16,7 +16,7 @@ const fade = {
 }
 
 export function VotePanel({ topic, size = 'card' }: { topic: Topic; size?: 'card' | 'page' }) {
-  const { t, n } = useI18n()
+  const { t } = useI18n()
   const { mine, cast } = useVotes()
   const toast = useToast()
   const [tally, setTally] = useState<Tally>(topic.tally)
@@ -82,17 +82,10 @@ export function VotePanel({ topic, size = 'card' }: { topic: Topic; size?: 'card
         )}
       </AnimatePresence>
 
-      {choice ? (
+      {/* Results appear only after voting; before that, nothing hints at them. */}
+      {choice && (
         <div className={big ? 'mt-8' : 'mt-5'}>
           <ResultBar tally={tally} headlineYesShare={topic.headlineYesShare} size={size} />
-        </div>
-      ) : big ? (
-        <p className="mt-3 flex items-center justify-center gap-1.5 text-[13px] text-ink-3 tabular">
-          <Lock className="size-3.5" /> {n(tally.yes + tally.no)} {t('votes')} · {t('voteToSee')}
-        </p>
-      ) : (
-        <div className="mt-5">
-          <LockedResult />
         </div>
       )}
 
