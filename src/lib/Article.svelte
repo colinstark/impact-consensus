@@ -1,5 +1,6 @@
 <script>
   import { supabase } from './supabase.js'
+  import Tally from './Tally.svelte'
 
   let { article, user, gate, onchange } = $props()
   let open = $state(false)
@@ -39,10 +40,7 @@
 </script>
 
 <article>
-  <div class="tally">
-    <span class="bubble agree" title="Agree">{agree}</span>
-    <span class="bubble disagree" title="Disagree">{disagree}</span>
-  </div>
+  <Tally {agree} {disagree} {mine} onvote={vote} />
 
   <div class="body">
     <a class="title" href={article.url} target="_blank" rel="noopener">{article.title ?? article.url}</a>
