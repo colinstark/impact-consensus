@@ -1,7 +1,6 @@
 import { motion } from 'framer-motion'
 import type { Tally } from '../api/types'
 import { useI18n } from '../lib/i18n'
-import { Lock } from './Icons'
 
 const pct = (x: number) => Math.round(x * 100)
 
@@ -106,27 +105,6 @@ function Legend({ color, label, share, count, align }: {
       <span className="font-semibold text-ink">{label}</span>
       <span className="tabular text-ink-2">{pct(share)}%</span>
       <span className="tabular text-ink-3">{align === 'right' ? `${count} ·` : `· ${count}`}</span>
-    </div>
-  )
-}
-
-export function LockedResult() {
-  const { t } = useI18n()
-  return (
-    <div aria-label={t('voteToSee')}>
-      <div className="flex items-center gap-2">
-        <div className="h-[34px] w-20 rounded-lg bg-fill" />
-        <div className="h-4 w-14 rounded bg-fill" />
-      </div>
-      <div className="relative mt-3">
-        <div className="flex h-3 gap-[2px]">
-          <div className="h-full w-[55%] rounded-l-full rounded-r-[4px] bg-fill-2" />
-          <div className="h-full flex-1 rounded-r-full rounded-l-[4px] bg-fill-2" />
-        </div>
-      </div>
-      <p className="mt-3 flex items-center gap-1.5 text-[13px] font-medium text-ink-3">
-        <Lock className="size-3.5" /> {t('voteToSee')}
-      </p>
     </div>
   )
 }

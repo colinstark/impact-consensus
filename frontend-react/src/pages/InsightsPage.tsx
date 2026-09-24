@@ -53,28 +53,9 @@ function SignUpWall() {
   const { t } = useI18n()
   return (
     <>
-      {/* Blurred preview so people can see what they're signing up for. */}
-      <div className="relative mt-6 overflow-hidden rounded-[22px] bg-card p-5" aria-hidden>
-        <div className="flex items-center gap-5 opacity-50 blur-[3px]">
-          <svg viewBox="0 0 100 100" className="size-24 -rotate-90">
-            <circle cx="50" cy="50" r="40" fill="none" stroke="var(--yes)" strokeWidth="14" strokeDasharray="140 252" />
-            <circle cx="50" cy="50" r="40" fill="none" stroke="var(--no)" strokeWidth="14" strokeDasharray="108 252" strokeDashoffset="-142" />
-          </svg>
-          <div className="flex-1 space-y-2.5">
-            {[70, 45, 60, 35].map((w, i) => (
-              <div key={i} className="flex h-2.5 gap-[2px]">
-                <div className="rounded-l-full bg-yes" style={{ width: `${w}%` }} />
-                <div className="flex-1 rounded-r-full bg-no" />
-              </div>
-            ))}
-          </div>
-        </div>
-        <div className="absolute inset-0 grid place-items-center">
-          <span className="flex items-center gap-1.5 rounded-full bg-elevated px-3 py-1.5 text-[13px] font-semibold shadow-sm">
-            <Lock className="size-3.5" /> {t('signUpTitle')}
-          </span>
-        </div>
-      </div>
+      <p className="mt-6 flex items-center gap-1.5 px-1 text-[15px] font-semibold">
+        <Lock className="size-4" /> {t('signUpTitle')}
+      </p>
       <div className="mt-4 rounded-[22px] bg-card p-5">
         <AccountForm />
       </div>

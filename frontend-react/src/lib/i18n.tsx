@@ -15,7 +15,6 @@ const strings = {
   trending: { en: 'Trending now', es: 'Tendencias', ca: 'Tendències' },
   yes: { en: 'Yes', es: 'Sí', ca: 'Sí' },
   no: { en: 'No', es: 'No', ca: 'No' },
-  voteToSee: { en: 'Vote to see results', es: 'Vota para ver resultados', ca: 'Vota per veure’n els resultats' },
   votes: { en: 'votes', es: 'votos', ca: 'vots' },
   sayYes: { en: 'say yes', es: 'dicen sí', ca: 'diuen sí' },
   sayNo: { en: 'say no', es: 'dicen no', ca: 'diuen no' },
