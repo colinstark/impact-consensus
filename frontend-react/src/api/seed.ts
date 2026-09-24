@@ -206,3 +206,91 @@ export const seedTopics: Topic[] = [
     createdAt: '2026-08-12',
   },
 ]
+
+// Sponsored questions from local businesses. These businesses are fictional, for the demo.
+export const sponsoredTopics: Topic[] = [
+  {
+    id: 'sp-bike-parking',
+    slug: 'sponsored-bike-parking',
+    city: 'barcelona',
+    area: 'Sant Martí',
+    category: { en: 'Streets', es: 'Calles', ca: 'Carrers' },
+    question: {
+      en: 'Should every metro station in Sant Martí get secure bike parking?',
+      es: '¿Debería cada estación de metro de Sant Martí tener aparcamiento seguro para bicis?',
+      ca: 'Hauria de tenir cada estació de metro de Sant Martí aparcament segur per a bicis?',
+    },
+    context: {
+      en: 'Cyclists say fear of theft stops them riding to the metro. Secure parking would take space from pavements or car parking.',
+      es: 'Los ciclistas dicen que el miedo a los robos les impide ir en bici al metro. El aparcamiento seguro quitaría espacio a aceras o plazas de coche.',
+      ca: 'Els ciclistes diuen que la por als robatoris els impedeix anar en bici al metro. L’aparcament segur trauria espai a voreres o places de cotxe.',
+    },
+    tally: { yes: 412, no: 198 },
+    sponsor: {
+      name: 'Bicis Poblenou',
+      about: {
+        en: 'Family bike repair shop in Poblenou.',
+        es: 'Taller familiar de bicis en el Poblenou.',
+        ca: 'Taller familiar de bicis al Poblenou.',
+      },
+    },
+    sources: coverage('aparcamiento bicis metro Barcelona'),
+    createdAt: '2026-09-10',
+  },
+  {
+    id: 'sp-loading-bays',
+    slug: 'sponsored-loading-bays',
+    city: 'barcelona',
+    area: 'Gràcia',
+    category: { en: 'Local business', es: 'Comercio local', ca: 'Comerç local' },
+    question: {
+      en: 'Should small shops get free morning loading bays on narrow streets?',
+      es: '¿Deberían los pequeños comercios tener zonas de carga gratuitas por la mañana en calles estrechas?',
+      ca: 'Haurien de tenir els petits comerços zones de càrrega gratuïtes al matí als carrers estrets?',
+    },
+    context: {
+      en: 'Deliveries on narrow streets often block traffic. Free morning slots would help shops but take space from residents’ parking.',
+      es: 'Las entregas en calles estrechas a menudo bloquean el tráfico. Las franjas gratuitas ayudarían a las tiendas, pero quitarían plazas a los vecinos.',
+      ca: 'Els lliuraments als carrers estrets sovint bloquegen el trànsit. Les franges gratuïtes ajudarien les botigues, però traurien places als veïns.',
+    },
+    tally: { yes: 287, no: 231 },
+    sponsor: {
+      name: 'Forn de la Vila',
+      about: {
+        en: 'Neighbourhood bakery in Gràcia.',
+        es: 'Panadería de barrio en Gràcia.',
+        ca: 'Forn de barri a Gràcia.',
+      },
+    },
+    sources: coverage('zonas carga descarga comercio Gràcia'),
+    createdAt: '2026-09-12',
+  },
+  {
+    id: 'sp-car-free-sunday',
+    slug: 'sponsored-car-free-sunday',
+    city: 'barcelona',
+    area: 'Eixample',
+    category: { en: 'Streets', es: 'Calles', ca: 'Carrers' },
+    question: {
+      en: 'Should the Eixample go car-free one Sunday a month?',
+      es: '¿Debería el Eixample cerrarse a los coches un domingo al mes?',
+      ca: 'Hauria l’Eixample de tancar-se als cotxes un diumenge al mes?',
+    },
+    context: {
+      en: 'Some European cities close central streets to cars on set Sundays for walking, cycling and street events.',
+      es: 'Algunas ciudades europeas cierran calles céntricas a los coches ciertos domingos para pasear, ir en bici y hacer actividades.',
+      ca: 'Algunes ciutats europees tanquen carrers cèntrics als cotxes alguns diumenges per passejar, anar en bici i fer activitats.',
+    },
+    tally: { yes: 530, no: 470 },
+    sponsor: {
+      name: 'Llibreria Nautilus',
+      about: {
+        en: 'Independent bookshop in the Eixample.',
+        es: 'Librería independiente en el Eixample.',
+        ca: 'Llibreria independent a l’Eixample.',
+      },
+    },
+    sources: coverage('domingo sin coches Barcelona'),
+    createdAt: '2026-09-15',
+  },
+]

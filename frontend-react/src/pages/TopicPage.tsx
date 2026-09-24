@@ -2,12 +2,14 @@ import { motion } from 'framer-motion'
 import { Link, useParams } from 'react-router-dom'
 import { useEffect } from 'react'
 import { Chart, ChevronRight, Lock, MapIcon, Share } from '../components/Icons'
+import { SponsorLabel } from '../components/Sponsored'
 import { useToast } from '../components/Toast'
 import { TopBar } from '../components/TopBar'
 import { Eyebrow, TopicRow } from '../components/TopicCard'
 import { VotePanel } from '../components/VotePanel'
 import { useAuth } from '../lib/auth'
 import { useCity } from '../lib/city'
+import { nextTopics } from '../lib/feed'
 import { useI18n } from '../lib/i18n'
 import { shareTopic } from '../lib/share'
 import { useTopic, useTopics } from '../lib/useTopics'
@@ -32,7 +34,7 @@ export default function TopicPage() {
   if (topic === null) return <NotFound />
 
   const voted = topic ? !!mine[topic.id] : false
-  const next = (topics ?? []).filter((x) => x.id !== topic?.id && !mine[x.id]).slice(0, 3)
+  const next = nextTopics(topics ?? [], mine, topic?.id).slice(0, 3)
 
   return (
     <>
@@ -47,6 +49,11 @@ export default function TopicPage() {
         ) : (
           <>
             <motion.section initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="pt-7">
+              {topic.sponsor && (
+                <div className="mb-3">
+                  <SponsorLabel sponsor={topic.sponsor} />
+                </div>
+              )}
               <Eyebrow topic={topic} />
               <h1 className="mt-3 text-[30px] font-bold leading-[1.12] tracking-[-0.02em]">{l(topic.question)}</h1>
               <p className="mt-3 text-[17px] leading-relaxed text-ink-2">{l(topic.context)}</p>

@@ -356,6 +356,56 @@ const strings = {
     es: 'De la comunidad',
     ca: 'De la comunitat',
   },
+  sponsored: {
+    en: 'Sponsored',
+    es: 'Patrocinada',
+    ca: 'Patrocinada',
+  },
+  sponsoredBy: {
+    en: 'Sponsored by {s}',
+    es: 'Patrocinada por {s}',
+    ca: 'Patrocinada per {s}',
+  },
+  whySponsored: {
+    en: 'Why am I seeing this?',
+    es: '¿Por qué veo esto?',
+    ca: 'Per què veig això?',
+  },
+  sponsorTitle: {
+    en: 'About sponsored questions',
+    es: 'Sobre las preguntas patrocinadas',
+    ca: 'Sobre les preguntes patrocinades',
+  },
+  sponsorRule1: {
+    en: 'Local businesses can pay to ask the community a question. It helps keep Plaça free and independent.',
+    es: 'Los comercios locales pueden pagar para hacer una pregunta a la comunidad. Así Plaça sigue siendo gratuita e independiente.',
+    ca: 'Els comerços locals poden pagar per fer una pregunta a la comunitat. Així Plaça continua sent gratuïta i independent.',
+  },
+  sponsorRule2: {
+    en: 'Sponsored questions are always labelled, never shown first, and you never have to answer them to unlock more.',
+    es: 'Las preguntas patrocinadas siempre están señaladas, nunca aparecen primero y nunca tienes que responderlas para desbloquear más.',
+    ca: 'Les preguntes patrocinades sempre estan indicades, mai no apareixen primer i mai no les has de respondre per desbloquejar-ne més.',
+  },
+  sponsorRule3: {
+    en: 'Sponsors can’t see who voted or how. They get the same public results as everyone else.',
+    es: 'Los patrocinadores no pueden ver quién ha votado ni qué. Ven los mismos resultados públicos que todo el mundo.',
+    ca: 'Els patrocinadors no poden veure qui ha votat ni què. Veuen els mateixos resultats públics que tothom.',
+  },
+  sponsorRule4: {
+    en: 'We check every sponsored question is neutral before it goes live.',
+    es: 'Revisamos que cada pregunta patrocinada sea neutral antes de publicarla.',
+    ca: 'Revisem que cada pregunta patrocinada sigui neutral abans de publicar-la.',
+  },
+  visitSponsor: {
+    en: 'Visit {s}',
+    es: 'Visitar {s}',
+    ca: 'Visitar {s}',
+  },
+  gotIt: {
+    en: 'Got it',
+    es: 'Entendido',
+    ca: 'Entesos',
+  },
 } satisfies Record<string, Localized>
 
 export type StringKey = keyof typeof strings

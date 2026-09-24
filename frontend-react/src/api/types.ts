@@ -21,6 +21,14 @@ export interface Source {
   kind?: 'article' | 'search'
 }
 
+/** A local business that paid to put a question to the community. Always labelled in the UI. */
+export interface Sponsor {
+  name: string
+  url?: string
+  /** One line about the business, shown in the "Why am I seeing this?" sheet. */
+  about?: Localized
+}
+
 export interface Topic {
   id: string
   /** URL-safe id used in deep links / QR codes: /t/:slug */
@@ -41,6 +49,8 @@ export interface Topic {
    */
   headlineYesShare?: number
   sources: Source[]
+  /** Sponsored questions are never shown in the top three and never block unlocking. */
+  sponsor?: Sponsor
   /** Set when the topic came from a community proposal that reached 100 upvotes. */
   fromProposal?: boolean
   createdAt: string

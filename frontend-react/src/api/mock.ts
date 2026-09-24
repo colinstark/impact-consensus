@@ -1,5 +1,5 @@
 import { DISTRICTS, DISTRICT_WEIGHT } from '../data/districts'
-import { coverage, seedTopics } from './seed'
+import { coverage, seedTopics, sponsoredTopics } from './seed'
 import type { Api, Choice, DistrictResult, Proposal, Tally, Topic, TrendPoint } from './types'
 
 // In-browser stand-in for the backend. Everything persists in localStorage so
@@ -113,7 +113,7 @@ function proposalTopic(p: StoredProposal, s: Store): Topic {
 
 function allTopics(s: Store): Topic[] {
   const promoted = allStoredProposals(s).filter((p) => s.accepted.includes(p.id)).map((p) => proposalTopic(p, s))
-  return [...seedTopics, ...promoted]
+  return [...seedTopics, ...sponsoredTopics, ...promoted]
 }
 
 function withLocalVotes(topic: Topic, s: Store): Topic {

@@ -1,12 +1,20 @@
 import type { SupabaseClient } from '@supabase/supabase-js'
-import type { Api, Choice, Localized, Tally, Topic, TrendPoint } from './types'
+import { DISTRICTS } from '../data/districts'
+import { mockApi } from './mock'
+import type { Api, Choice, DistrictResult, Localized, Source, Tally, Topic, TrendPoint } from './types'
 
 // Real backend: each analysed article in Supabase is a topic. Its `statement` is the
 // question people vote on and its `description` is the neutral context.
 // Enabled by setting VITE_SUPABASE_URL and VITE_SUPABASE_PUBLISHABLE_KEY.
+//
+// Features without tables yet (proposals, sponsored questions, postcode → district)
+// fall back to the in-browser mock, so they keep working on the live demo. Their ids
+// are never numeric, so they can't collide with article ids.
 
 type Row = {
   id: number
+  url: string
+  title: string | null
   statement: string
   description: string | null
   location: string | null
@@ -17,40 +25,44 @@ type Row = {
 }
 
 const COLUMNS =
-  'id, statement, description, location, created_at, published_at, votes(stance), article_topics(topics(name))'
+  'id, url, title, statement, description, location, created_at, published_at, votes(stance), article_topics(topics(name))'
 
-// The database has no "don't mind" vote, so skips are remembered in this browser only.
-const SKIPS = 'placa.skips'
-const skips = (): string[] => {
-  try {
-    return JSON.parse(localStorage.getItem(SKIPS) ?? '[]')
-  } catch {
-    return []
-  }
-}
-const setSkip = (topicId: string, on: boolean) => {
-  const rest = skips().filter((id) => id !== topicId)
-  localStorage.setItem(SKIPS, JSON.stringify(on ? [...rest, topicId] : rest))
-}
+const isArticle = (id: string) => /^\d+$/.test(id)
 
 // Statements are written in one language; show the same text in every UI language.
 const same = (text: string): Localized => ({ en: text, es: text, ca: text })
 
-function tallyOf(topicId: string, votes: Row['votes']): Tally {
+function tallyOf(votes: { stance: 'agree' | 'disagree' }[]): Tally {
   const yes = votes.filter((v) => v.stance === 'agree').length
-  return { yes, no: votes.length - yes, skip: skips().includes(topicId) ? 1 : 0 }
+  return { yes, no: votes.length - yes }
+}
+
+function outletOf(url: string) {
+  try {
+    return new URL(url).hostname.replace(/^www\./, '')
+  } catch {
+    return url
+  }
 }
 
 function toTopic(row: Row): Topic {
   const id = String(row.id)
+  const source: Source = {
+    outlet: outletOf(row.url),
+    title: row.title ?? row.statement,
+    url: row.url,
+    publishedAt: row.published_at ?? undefined,
+  }
   return {
     id,
     slug: id,
+    city: 'barcelona',
     area: row.location ?? 'Barcelona',
     category: same(row.article_topics.find((t) => t.topics)?.topics?.name ?? ''),
     question: same(row.statement),
     context: same(row.description ?? ''),
-    tally: tallyOf(id, row.votes),
+    tally: tallyOf(row.votes),
+    sources: [source],
     createdAt: row.published_at ?? row.created_at,
   }
 }
@@ -73,23 +85,25 @@ export function supabaseApi(db: SupabaseClient): Api {
   async function tally(topicId: string): Promise<Tally> {
     const { data, error } = await db.from('votes').select('stance').eq('article_id', topicId)
     if (error) throw error
-    return tallyOf(topicId, data)
+    return tallyOf(data)
   }
 
   return {
-    async listTopics() {
-      const { data, error } = await db
-        .from('articles')
-        .select(COLUMNS)
-        .not('statement', 'is', null)
-        .order('created_at', { ascending: false })
+    async listTopics(city) {
+      const [{ data, error }, local] = await Promise.all([
+        db.from('articles').select(COLUMNS).not('statement', 'is', null).order('created_at', { ascending: false }),
+        mockApi.listTopics(city),
+      ])
       if (error) throw error
+      const real = (data as unknown as Row[]).map(toTopic).filter((t) => t.city === city)
+      // Demo-only: sponsored questions and accepted proposals until they have tables.
+      const extra = local.filter((t) => t.sponsor || t.fromProposal)
       // Most-voted first; the newest wins a tie (sort keeps the date order).
-      return (data as unknown as Row[]).map(toTopic).sort((a, b) => total(b.tally) - total(a.tally))
+      return [...real, ...extra].sort((a, b) => total(b.tally) - total(a.tally))
     },
 
     async getTopic(slug) {
-      if (!/^\d+$/.test(slug)) return null
+      if (!isArticle(slug)) return mockApi.getTopic(slug)
       const { data, error } = await db
         .from('articles')
         .select(COLUMNS)
@@ -100,25 +114,21 @@ export function supabaseApi(db: SupabaseClient): Api {
       return data ? toTopic(data as unknown as Row) : null
     },
 
-    async vote(topicId, choice) {
+    async vote(topicId, input) {
+      if (!isArticle(topicId)) return mockApi.vote(topicId, input)
       const user = await voter()
-      const { error } =
-        choice === 'skip'
-          ? await db.from('votes').delete().eq('article_id', topicId).eq('user_id', user.id)
-          : await db
-              .from('votes')
-              .upsert(
-                { article_id: Number(topicId), user_id: user.id, stance: choice === 'yes' ? 'agree' : 'disagree' },
-                { onConflict: 'article_id,user_id' },
-              )
+      const { error } = await db
+        .from('votes')
+        .upsert(
+          { article_id: Number(topicId), user_id: user.id, stance: input.choice === 'yes' ? 'agree' : 'disagree' },
+          { onConflict: 'article_id,user_id' },
+        )
       if (error) throw error
-      setSkip(topicId, choice === 'skip')
       return tally(topicId)
     },
 
-    async getMyVotes() {
-      const mine: Record<string, Choice> = {}
-      for (const id of skips()) mine[id] = 'skip'
+    async getMyVotes(deviceId) {
+      const mine: Record<string, Choice> = { ...(await mockApi.getMyVotes(deviceId)) }
       const user = await currentUser()
       if (!user) return mine
       const { data, error } = await db.from('votes').select('article_id, stance').eq('user_id', user.id)
@@ -127,7 +137,27 @@ export function supabaseApi(db: SupabaseClient): Api {
       return mine
     },
 
+    // The votes table tags places by barrio (votes.barrio_id), which the postcode
+    // doesn't give us, so the district is only kept on the device for now.
+    setDistrict: mockApi.setDistrict,
+
+    async getDistrictResults(topicId) {
+      if (!isArticle(topicId)) return mockApi.getDistrictResults(topicId)
+      const { data, error } = await db
+        .from('votes')
+        .select('stance, barrios(district)')
+        .eq('article_id', topicId)
+        .not('barrio_id', 'is', null)
+      if (error) throw error
+      const rows = data as unknown as { stance: 'agree' | 'disagree'; barrios: { district: string | null } | null }[]
+      return DISTRICTS.map(({ id, name }): DistrictResult => {
+        const here = rows.filter((r) => r.barrios?.district === name)
+        return { districtId: id, ...tallyOf(here) }
+      })
+    },
+
     async getTrend(topicId, range) {
+      if (!isArticle(topicId)) return mockApi.getTrend(topicId, range)
       const { data, error } = await db
         .from('votes')
         .select('stance, created_at')
@@ -161,6 +191,12 @@ export function supabaseApi(db: SupabaseClient): Api {
       const keep = range === '1m' ? 31 : range === '3m' ? 92 : points.length
       return points.slice(-keep)
     },
+
+    // Demo-only until there's a proposals table.
+    listProposals: mockApi.listProposals,
+    createProposal: mockApi.createProposal,
+    upvoteProposal: mockApi.upvoteProposal,
+    getMyUpvotes: mockApi.getMyUpvotes,
 
     async requestMagicLink(email) {
       const { error } = await db.auth.signInWithOtp({

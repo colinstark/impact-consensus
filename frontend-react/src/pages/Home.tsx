@@ -6,26 +6,13 @@ import { ProposalCard } from '../components/ProposalCard'
 import { TopBar } from '../components/TopBar'
 import { TopicCard } from '../components/TopicCard'
 import { useToast } from '../components/Toast'
-import type { Topic } from '../api/types'
 import { cityName } from '../data/cities'
 import { useCity } from '../lib/city'
+import { arrangeFeed, BATCH, visibleTopics } from '../lib/feed'
 import { useI18n } from '../lib/i18n'
 import { UPVOTE_THRESHOLD, useProposals } from '../lib/useProposals'
 import { useTopics } from '../lib/useTopics'
 import { useVotes } from '../lib/votes'
-
-const BATCH = 3
-
-/** Show topics in batches of three; answering every topic in a batch unlocks the next. */
-function visibleTopics(topics: Topic[], answered: Record<string, unknown>) {
-  let count = 0
-  while (count < topics.length) {
-    const batch = topics.slice(count, count + BATCH)
-    count += batch.length
-    if (!batch.every((t) => answered[t.id])) break
-  }
-  return topics.slice(0, count)
-}
 
 export default function Home() {
   const { t } = useI18n()
@@ -37,7 +24,7 @@ export default function Home() {
   const toast = useToast()
 
   // Keep the original order stable while people vote; tallies change but cards shouldn't jump.
-  const visible = topics && ready ? visibleTopics(topics, mine) : null
+  const visible = topics && ready ? visibleTopics(arrangeFeed(topics), mine) : null
   const remaining = topics && visible ? topics.length - visible.length : 0
   const prevCount = useRef<number | null>(null)
 

@@ -4,6 +4,7 @@ import type { Topic } from '../api/types'
 import { useI18n } from '../lib/i18n'
 import { useVotes } from '../lib/votes'
 import { ChevronRight, MapIcon, Pin } from './Icons'
+import { SponsorLabel } from './Sponsored'
 import { VotePanel } from './VotePanel'
 
 export function Eyebrow({ topic }: { topic: Topic }) {
@@ -32,6 +33,11 @@ export function TopicCard({ topic, index = 0 }: { topic: Topic; index?: number }
       transition={{ delay: index * 0.06, type: 'spring', bounce: 0.2, duration: 0.6 }}
       className="rounded-[22px] bg-card p-5 shadow-[0_1px_2px_rgb(0_0_0/0.04),0_8px_24px_rgb(0_0_0/0.04)]"
     >
+      {topic.sponsor && (
+        <div className="mb-3 border-b border-hair pb-3">
+          <SponsorLabel sponsor={topic.sponsor} />
+        </div>
+      )}
       <Link to={`/t/${topic.slug}`} className="group block">
         <Eyebrow topic={topic} />
         <h3 className="mt-2 flex items-start justify-between gap-3 text-[21px] font-semibold leading-[1.2] tracking-[-0.01em]">
@@ -58,11 +64,14 @@ export function TopicCard({ topic, index = 0 }: { topic: Topic; index?: number }
 
 /** Compact row used for "keep going" lists. */
 export function TopicRow({ topic }: { topic: Topic }) {
-  const { l } = useI18n()
+  const { l, t } = useI18n()
   return (
     <Link to={`/t/${topic.slug}`} className="flex items-center gap-3 px-4 py-3.5 active:bg-fill">
       <div className="min-w-0 flex-1">
-        <div className="text-[12px] font-medium text-ink-3">{topic.area}</div>
+        <div className="text-[12px] font-medium text-ink-3">
+          {topic.area}
+          {topic.sponsor && <> · {t('sponsoredBy', { s: topic.sponsor.name })}</>}
+        </div>
         <div className="text-[16px] font-medium leading-snug">{l(topic.question)}</div>
       </div>
       <ChevronRight className="size-4 shrink-0 text-ink-3" />

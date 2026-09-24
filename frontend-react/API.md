@@ -43,6 +43,11 @@ All bodies are JSON. Types (`Topic`, `Tally`, `Choice`, `TrendPoint`) are define
 - **Proposals:** one upvote per device, and every upvote carries a yes/no answer. When `upvotes` reaches 100 before
   `expiresAt` (created + 48 h), set `status: "accepted"`, create a topic, carry the upvote answers over as its
   votes, and return its `topicSlug`. After 48 h without 100 upvotes the status becomes `expired`.
+- **Sponsored questions:** a topic with `sponsor: { name, url?, about? }` is a paid question from a local business.
+  The front end handles placement: never in the first three, at most one per later batch of three (last slot),
+  always labelled, and never required to unlock more topics (`src/lib/feed.ts`). Sponsors should only ever get
+  the same public results as everyone else. With Supabase, the demo sponsored questions still come from the mock
+  until there's a `sponsor` column or table.
 - **Localised fields** (`question`, `context`, `category`) are `{ en, es, ca }` objects.
 - **Trend** `yesShare` = yes / (yes + no) cumulative up to that day; `votes` = cumulative yes + no.
 - **Magic link:** the email should link to the front end with a token. The front end currently keeps
