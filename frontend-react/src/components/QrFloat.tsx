@@ -1,5 +1,5 @@
 import { AnimatePresence, motion } from 'framer-motion'
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
 import { encode } from 'uqr'
 import type { Topic } from '../api/types'
@@ -8,7 +8,7 @@ import { useI18n } from '../lib/i18n'
 // A QR code for the current question, floating bottom right, so a screen or a laptop at an
 // event can invite the room to vote. Scans land on the question with ?src=qr, which the app
 // already records as the entry source. It can be minimised to a small button, and enlarged
-// to fill the screen for presenting.
+// to fill the screen for presenting with the maximise button.
 
 const KEY = 'placa.qr'
 
@@ -27,6 +27,7 @@ export function QrFloat({ topic }: { topic: Topic }) {
   const { t, l } = useI18n()
   const [open, setOpenState] = useState(initialOpen)
   const [big, setBig] = useState(false)
+  const screen = useRef<HTMLDivElement>(null)
   const url = `${location.origin}/t/${topic.slug}?src=qr`
 
   const setOpen = (v: boolean) => {
@@ -37,6 +38,23 @@ export function QrFloat({ topic }: { topic: Topic }) {
       // Not remembered, but still works for this visit.
     }
   }
+
+  // While enlarged, also ask the browser for real full screen (hides its bars on a projector).
+  // Leaving full screen with Esc closes the enlarged view too.
+  useEffect(() => {
+    if (!big) return
+    const el = screen.current
+    el?.requestFullscreen?.().catch(() => {})
+    const onKey = (e: KeyboardEvent) => e.key === 'Escape' && setBig(false)
+    const onExit = () => !document.fullscreenElement && setBig(false)
+    window.addEventListener('keydown', onKey)
+    document.addEventListener('fullscreenchange', onExit)
+    return () => {
+      window.removeEventListener('keydown', onKey)
+      document.removeEventListener('fullscreenchange', onExit)
+      if (document.fullscreenElement) document.exitFullscreen().catch(() => {})
+    }
+  }, [big])
 
   return (
     <>
@@ -49,19 +67,29 @@ export function QrFloat({ topic }: { topic: Topic }) {
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.9, y: 12 }}
               transition={{ type: 'spring', bounce: 0.18, duration: 0.35 }}
-              className="w-[184px] origin-bottom-right rounded-[22px] bg-card p-3 shadow-[0_1px_2px_rgb(0_0_0/0.06),0_12px_32px_rgb(0_0_0/0.16)]"
+              // A quarter of the screen width, never smaller than a comfortable scan size.
+              className="w-[max(200px,25vw)] origin-bottom-right rounded-[24px] bg-card p-3 shadow-[0_1px_2px_rgb(0_0_0/0.06),0_12px_32px_rgb(0_0_0/0.16)]"
             >
-              <div className="flex items-center justify-between gap-2 pb-2 pl-1">
-                <span className="text-[13px] font-semibold">{t('scanToVote')}</span>
+              <div className="flex items-center gap-2 pb-2.5 pl-1">
+                <span className="flex-1 text-[clamp(14px,1.3vw,20px)] font-semibold">{t('scanToVote')}</span>
                 <button
                   onClick={() => setOpen(false)}
                   aria-label={t('hideQr')}
-                  className="grid size-7 place-items-center rounded-full bg-fill text-ink-2 active:scale-95"
+                  title={t('hideQr')}
+                  className="grid size-8 place-items-center rounded-full bg-fill text-ink-2 active:scale-95"
                 >
                   <Minus />
                 </button>
+                <button
+                  onClick={() => setBig(true)}
+                  aria-label={t('enlargeQr')}
+                  title={t('enlargeQr')}
+                  className="grid size-8 place-items-center rounded-full bg-fill text-ink-2 active:scale-95"
+                >
+                  <Maximize />
+                </button>
               </div>
-              <button onClick={() => setBig(true)} aria-label={t('enlargeQr')} className="block w-full rounded-[14px] bg-white p-2 active:scale-[0.98]">
+              <button onClick={() => setBig(true)} aria-label={t('enlargeQr')} className="block w-full rounded-[16px] bg-white p-2 active:scale-[0.98]">
                 <Code url={url} />
               </button>
             </motion.div>
@@ -86,6 +114,7 @@ export function QrFloat({ topic }: { topic: Topic }) {
         <AnimatePresence>
           {big && (
             <motion.div
+              ref={screen}
               className="fixed inset-0 z-50 flex flex-col items-center justify-center gap-6 bg-white p-6 text-center text-black"
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
@@ -95,8 +124,16 @@ export function QrFloat({ topic }: { topic: Topic }) {
               aria-modal="true"
               aria-label={t('scanToVote')}
             >
-              <p className="max-w-2xl text-[clamp(22px,4vw,40px)] font-bold leading-tight tracking-tight">{l(topic.question)}</p>
-              <div className="w-[min(70vh,80vw)]">
+              <button
+                onClick={() => setBig(false)}
+                aria-label={t('exitFullScreen')}
+                title={t('exitFullScreen')}
+                className="absolute top-5 right-5 grid size-11 place-items-center rounded-full bg-neutral-100 text-neutral-700 active:scale-95"
+              >
+                <Minimize />
+              </button>
+              <p className="max-w-3xl text-[clamp(22px,4vw,44px)] font-bold leading-tight tracking-tight">{l(topic.question)}</p>
+              <div className="w-[min(68vh,85vw)]">
                 <Code url={url} />
               </div>
               <p className="text-[clamp(16px,2.4vw,24px)] font-semibold">{t('scanToVote')}</p>
@@ -129,6 +166,18 @@ function Code({ url }: { url: string }) {
 const Minus = () => (
   <svg viewBox="0 0 24 24" className="size-4" fill="none" stroke="currentColor" strokeWidth={2.5} strokeLinecap="round" aria-hidden>
     <path d="M6 12h12" />
+  </svg>
+)
+
+const Maximize = () => (
+  <svg viewBox="0 0 24 24" className="size-4" fill="none" stroke="currentColor" strokeWidth={2.2} strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+    <path d="M14 4h6v6M10 20H4v-6M20 4l-7 7M4 20l7-7" />
+  </svg>
+)
+
+const Minimize = () => (
+  <svg viewBox="0 0 24 24" className="size-5" fill="none" stroke="currentColor" strokeWidth={2.2} strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+    <path d="M20 10h-6V4M4 14h6v6M14 10l7-7M10 14l-7 7" />
   </svg>
 )
 
