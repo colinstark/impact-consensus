@@ -3,8 +3,8 @@
 
   let { agree, disagree, mine, onvote } = $props()
 
-  const SIZE = 72
-  const R = 24 // radius of a unanimous bubble; area scales with vote share
+  const SIZE = 96
+  const R = 32 // radius of a unanimous bubble; area scales with vote share
   const GAP = 2
 
   const total = $derived(agree + disagree)
