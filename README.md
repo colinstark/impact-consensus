@@ -1,5 +1,7 @@
 # impact-consensus
 
+> **Live site:** Netlify now builds the React front end in [`frontend-react/`](frontend-react/) (see `netlify.toml`). The Svelte app at the root is kept for reference but not deployed.
+
 Svelte (Vite, JS) frontend on Netlify, Supabase for database, realtime, edge functions, and cron.
 
 ## Layout
