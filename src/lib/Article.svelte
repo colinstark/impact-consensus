@@ -2,10 +2,8 @@
   import { supabase } from './supabase.js'
   import Tally from './Tally.svelte'
 
-  let { article, user, gate, onchange } = $props()
-  let open = $state(false)
-  let body = $state('')
-  let link = $state('')
+  let { article, user, canPost, allowVote, voterId, onjoin, onchange } = $props()
+  let draft = $state('')
   let error = $state('')
 
   const agree = $derived(article.votes.filter((v) => v.stance === 'agree').length)
@@ -20,61 +18,70 @@
     return !err
   }
 
+  // Returns synchronously whether the vote goes ahead, so the bubble can react instantly.
   function vote(stance) {
-    if (!gate()) return false
-    const key = { article_id: article.id, user_id: user.id }
-    // Clicking your current stance again retracts the vote.
-    run(
-      mine === stance
-        ? supabase.from('votes').delete().match(key)
-        : supabase.from('votes').upsert({ ...key, stance }),
-    )
+    const retracting = mine === stance
+    if (!retracting && !allowVote()) return false
+    cast(stance, retracting)
     return true
+  }
+
+  async function cast(stance, retracting) {
+    const uid = await voterId()
+    if (!uid) return
+    const key = { article_id: article.id, user_id: uid }
+    run(retracting ? supabase.from('votes').delete().match(key) : supabase.from('votes').upsert({ ...key, stance }))
   }
 
   async function addContext(e) {
     e.preventDefault()
-    if (!gate()) return
-    const row = { article_id: article.id, body: body.trim() || null, url: link.trim() || null }
-    if (await run(supabase.from('article_context').insert(row))) body = link = ''
+    if (!onjoin()) return
+    const text = draft.trim()
+    // A bare link is stored as a supporting link; anything else is a note.
+    const isLink = /^https?:\/\/\S+$/.test(text)
+    const row = { article_id: article.id, body: isLink ? null : text, url: isLink ? text : null }
+    if (await run(supabase.from('article_context').insert(row))) draft = ''
   }
 </script>
 
-<article>
-  <Tally {agree} {disagree} {mine} onvote={vote} />
+{#snippet byline(author)}
+  {author.nickname}{#if author.barrios}<span class="barrio"> · {author.barrios.name}</span>{/if}
+{/snippet}
 
-  <div class="body">
-    <a class="title" href={article.url} target="_blank" rel="noopener">{article.title ?? article.url}</a>
-    <p class="muted">{host} · {new Date(article.created_at).toLocaleDateString()}</p>
-    {#if article.clean_text}<p class="recap">{article.clean_text.slice(0, 280)}…</p>{/if}
-    <button class="toggle" class:open onclick={() => (open = !open)}>
-      Context ({article.article_context.length})
-    </button>
+<article class="card">
+  <div class="card-head">
+    <Tally {agree} {disagree} {mine} onvote={vote} />
+    <div class="body">
+      <a class="title" href={article.url} target="_blank" rel="noopener">{article.title ?? article.url}</a>
+      <p class="muted">
+        {host} · {new Date(article.created_at).toLocaleDateString()}
+        {#if article.author} · {@render byline(article.author)}{/if}
+      </p>
+      {#if article.clean_text}<p class="recap">{article.clean_text.slice(0, 280)}…</p>{/if}
+    </div>
+    <div class="actions">
+      <button class="vote agree" class:on={mine === 'agree'} onclick={() => vote('agree')}>Agree</button>
+      <button class="vote disagree" class:on={mine === 'disagree'} onclick={() => vote('disagree')}>Disagree</button>
+    </div>
+  </div>
+
+  <section class="thread">
+    {#each article.article_context as c (c.id)}
+      <div class="msg" class:mine={c.user_id === user?.id}>
+        <span class="who">{#if c.author}{@render byline(c.author)}{:else}someone{/if}</span>
+        {#if c.body}<p>{c.body}</p>{/if}
+        {#if c.url}<a href={c.url} target="_blank" rel="noopener">{c.url}</a>{/if}
+      </div>
+    {/each}
+
+    {#if canPost}
+      <form class="composer" onsubmit={addContext}>
+        <input placeholder="Add context or paste a link…" bind:value={draft} />
+        <button type="submit" disabled={!draft.trim()} aria-label="Send">↑</button>
+      </form>
+    {:else}
+      <button class="link join" onclick={onjoin}>Join to add context</button>
+    {/if}
     {#if error}<p class="error">{error}</p>{/if}
-  </div>
-
-  <div class="actions">
-    <button class="vote agree" class:on={mine === 'agree'} onclick={() => vote('agree')}>Agree</button>
-    <button class="vote disagree" class:on={mine === 'disagree'} onclick={() => vote('disagree')}>Disagree</button>
-  </div>
-
-  {#if open}
-    <section class="context">
-      {#each article.article_context as c (c.id)}
-        <div class="note">
-          {#if c.body}<p>{c.body}</p>{/if}
-          {#if c.url}<a href={c.url} target="_blank" rel="noopener">{c.url}</a>{/if}
-        </div>
-      {/each}
-      {#if user}
-        <form onsubmit={addContext}>
-          <textarea rows="2" placeholder="Add context…" bind:value={body}></textarea>
-          <input type="url" placeholder="Supporting link (optional)" bind:value={link} />
-          <button type="submit" disabled={!body.trim() && !link.trim()}>Post</button>
-        </form>
-      {:else}
-        <button class="link" onclick={gate}>Sign in to add context</button>
-      {/if}
-    </section>
-  {/if}
+  </section>
 </article>

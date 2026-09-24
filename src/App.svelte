@@ -1,24 +1,51 @@
 <script>
   import { supabase } from './lib/supabase.js'
   import SignIn from './lib/SignIn.svelte'
+  import Profile from './lib/Profile.svelte'
   import Article from './lib/Article.svelte'
 
+  const FREE_VOTES = 3
+  const HOUR = 60 * 60 * 1000
+  const AUTHOR = 'author:profiles!{fk}(nickname, barrios(name))'
+
   let user = $state(null)
+  let profile = $state(null)
   let articles = $state([])
-  let signingIn = $state(false)
+  let modal = $state(null) // 'signin' | 'limit' | 'profile'
   let url = $state('')
   let error = $state('')
+
+  // Anonymous users are guests who voted; members have an email-backed account.
+  const memberId = $derived(user && !user.is_anonymous ? user.id : null)
+  const canPostNow = $derived(!!(memberId && profile))
 
   supabase.auth.getSession().then(({ data }) => (user = data.session?.user ?? null))
   supabase.auth.onAuthStateChange((_event, session) => {
     user = session?.user ?? null
-    if (user) signingIn = false
+    if (user && !user.is_anonymous && modal !== 'profile') modal = null
+  })
+
+  $effect(() => {
+    const id = memberId
+    profile = null
+    if (!id) return
+    supabase
+      .from('profiles')
+      .select('*')
+      .eq('id', id)
+      .maybeSingle()
+      .then(({ data }) => {
+        profile = data
+        if (!data) modal = 'profile'
+      })
   })
 
   async function load() {
     const { data, error: err } = await supabase
       .from('articles')
-      .select('*, votes(stance, user_id), article_context(*)')
+      .select(
+        `*, ${AUTHOR.replace('{fk}', 'submitted_by')}, votes(stance, user_id), article_context(*, ${AUTHOR.replace('{fk}', 'user_id')})`,
+      )
       .order('created_at', { ascending: false })
       .order('created_at', { referencedTable: 'article_context' })
     if (err) error = err.message
@@ -28,15 +55,36 @@
   load()
   supabase.channel('feed').on('postgres_changes', { event: '*', schema: 'public' }, load).subscribe()
 
-  // Opens the sign-in modal when signed out; returns whether the action may proceed.
-  function gate() {
-    if (!user) signingIn = true
-    return !!user
+  // Guests get FREE_VOTES per hour, counted in this browser; members are unlimited.
+  function allowVote() {
+    if (memberId) return true
+    const recent = JSON.parse(localStorage.getItem('guest-votes') ?? '[]').filter((t) => Date.now() - t < HOUR)
+    if (recent.length >= FREE_VOTES) {
+      modal = 'limit'
+      return false
+    }
+    localStorage.setItem('guest-votes', JSON.stringify([...recent, Date.now()]))
+    return true
+  }
+
+  // Guests vote as an anonymous Supabase user, created on their first vote.
+  async function voterId() {
+    if (user) return user.id
+    const { data, error: err } = await supabase.auth.signInAnonymously()
+    if (err) error = err.message
+    return data.user?.id
+  }
+
+  // Posting needs an account and a nickname; opens whichever step is missing.
+  function canPost() {
+    if (!memberId) modal = 'signin'
+    else if (!profile) modal = 'profile'
+    return canPostNow
   }
 
   async function add(e) {
     e.preventDefault()
-    if (!gate()) return
+    if (!canPost()) return
     error = ''
     const { error: err } = await supabase.from('articles').insert({ url: url.trim() })
     if (err) error = err.code === '23505' ? 'That article is already here.' : err.message
@@ -49,28 +97,36 @@
 
 <header>
   <h1>Impact Consensus</h1>
-  {#if user}
-    <span class="muted">{user.email}</span>
-    <button class="link" onclick={() => supabase.auth.signOut()}>Sign out</button>
+  {#if memberId}
+    <button class="link" onclick={() => (modal = 'profile')}>{profile?.nickname ?? user.email}</button>
+    <button class="link muted" onclick={() => supabase.auth.signOut()}>Sign out</button>
   {:else}
-    <button class="link" onclick={() => (signingIn = true)}>Sign in</button>
+    <button class="link" onclick={() => (modal = 'signin')}>Sign in</button>
   {/if}
 </header>
 
 <main>
-  <form class="add" onsubmit={add}>
-    <input type="url" required placeholder="Paste an article link…" bind:value={url} />
-    <button type="submit">Add</button>
-  </form>
-  {#if error}<p class="error">{error}</p>{/if}
+  <section class="card compose">
+    <form class="add" onsubmit={add}>
+      <input type="url" required placeholder="Share an article link…" bind:value={url} />
+      <button type="submit">Post</button>
+    </form>
+    {#if error}<p class="error">{error}</p>{/if}
+  </section>
 
   {#each articles as article (article.id)}
-    <Article {article} {user} {gate} onchange={load} />
+    <Article {article} {user} canPost={canPostNow} {allowVote} {voterId} onjoin={canPost} onchange={load} />
   {:else}
     <p class="muted empty">No articles yet. Add the first one.</p>
   {/each}
 </main>
 
-{#if signingIn}
-  <SignIn onclose={() => (signingIn = false)} />
+{#if modal === 'signin' || modal === 'limit'}
+  <SignIn
+    anonymous={!!user?.is_anonymous}
+    reason={modal === 'limit' ? `You've used your ${FREE_VOTES} free votes this hour. Create an account to keep voting; your votes come with you.` : ''}
+    onclose={() => (modal = null)}
+  />
+{:else if modal === 'profile' && memberId}
+  <Profile {profile} userId={memberId} onsaved={(p) => (profile = p)} onclose={() => (modal = null)} />
 {/if}

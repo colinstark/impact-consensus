@@ -1,7 +1,7 @@
 <script>
   import { supabase } from './supabase.js'
 
-  let { onclose } = $props()
+  let { anonymous = false, reason = '', onclose } = $props()
   let dialog
   let email = $state('')
   let status = $state('idle')
@@ -13,10 +13,12 @@
     e.preventDefault()
     status = 'sending'
     error = ''
-    const { error: err } = await supabase.auth.signInWithOtp({
-      email,
-      options: { emailRedirectTo: location.origin },
-    })
+    const redirect = { emailRedirectTo: location.origin }
+    // Upgrading an anonymous voter keeps their votes; an existing account just signs in.
+    let err = anonymous ? (await supabase.auth.updateUser({ email }, redirect)).error : null
+    if (!anonymous || err?.code === 'email_exists') {
+      err = (await supabase.auth.signInWithOtp({ email, options: redirect })).error
+    }
     status = err ? 'idle' : 'sent'
     if (err) error = err.message
   }
@@ -29,6 +31,7 @@
       <p>Check <strong>{email}</strong> for a sign-in link.</p>
       <button onclick={() => dialog.close()}>Done</button>
     {:else}
+      {#if reason}<p>{reason}</p>{/if}
       <p class="muted">We'll email you a link. No password needed.</p>
       <form onsubmit={send}>
         <!-- svelte-ignore a11y_autofocus -->
