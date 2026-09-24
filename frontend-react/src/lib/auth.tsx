@@ -1,4 +1,5 @@
-import { createContext, useContext, useState, type ReactNode } from 'react'
+import { createContext, useContext, useEffect, useState, type ReactNode } from 'react'
+import { supabase } from '../api'
 import type { User } from '../api/types'
 
 const KEY = 'placa.user'
@@ -26,8 +27,27 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     signOut: () => {
       localStorage.removeItem(KEY)
       setUser(null)
+      supabase?.auth.signOut()
     },
   }
+
+  // With Supabase, someone is signed in once they come back from the emailed link.
+  // Guest (anonymous) sessions used for voting don't count as signed in.
+  useEffect(() => {
+    if (!supabase) return
+    const { data } = supabase.auth.onAuthStateChange((_event, session) => {
+      const email = session?.user.is_anonymous ? undefined : session?.user.email
+      if (email) {
+        localStorage.setItem(KEY, JSON.stringify({ email }))
+        setUser({ email })
+      } else {
+        localStorage.removeItem(KEY)
+        setUser(null)
+      }
+    })
+    return () => data.subscription.unsubscribe()
+  }, [])
+
   return <Ctx.Provider value={value}>{children}</Ctx.Provider>
 }
 

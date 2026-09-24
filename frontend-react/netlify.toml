@@ -7,6 +7,9 @@
 
 [build.environment]
   NODE_VERSION = "22"
+  # Public by design (the publishable key only allows what the database's access rules allow).
+  VITE_SUPABASE_URL = "https://rtfssrhtookyhkqwogde.supabase.co"
+  VITE_SUPABASE_PUBLISHABLE_KEY = "sb_publishable_eu_o5ICXBkPHoqXoAw-aHg_I4HSm3Pw"
 
 # Client-side routes (e.g. /t/tourists-go-home) all serve the app shell.
 [[redirects]]
