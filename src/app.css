@@ -44,20 +44,49 @@ button.link { padding: 0; border: 0; background: none; color: var(--ink); text-d
 
 .add { display: flex; gap: 8px; margin-bottom: 8px; }
 
-article { padding: 20px 0; border-bottom: 1px solid var(--line); }
+article {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  gap: 0 16px;
+  align-items: start;
+  padding: 20px 0;
+  border-bottom: 1px solid var(--line);
+}
 .title { font: 600 1.125rem Georgia, serif; color: var(--ink); text-decoration: none; word-break: break-word; }
 .title:hover { text-decoration: underline; }
 .recap { margin: 8px 0 0; }
+.body { min-width: 0; }
 
-.actions { display: flex; align-items: center; gap: 8px; margin-top: 12px; }
+.tally { display: grid; gap: 6px; }
+.bubble {
+  display: grid;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  font-size: 0.875rem;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+.bubble.agree { background: color-mix(in srgb, var(--agree) 14%, #fff); color: var(--agree); }
+.bubble.disagree { background: color-mix(in srgb, var(--disagree) 14%, #fff); color: var(--disagree); }
+
+.actions { display: flex; gap: 8px; }
 .vote { padding: 4px 12px; background: #fff; font-size: 0.875rem; }
 .vote.agree { border-color: var(--agree); color: var(--agree); }
 .vote.disagree { border-color: var(--disagree); color: var(--disagree); }
 .vote.agree.on { background: var(--agree); color: #fff; }
 .vote.disagree.on { background: var(--disagree); color: #fff; }
-.actions .link { margin-left: auto; font-size: 0.875rem; }
 
-.context { margin-top: 12px; padding-left: 16px; border-left: 2px solid var(--line); }
+.toggle { margin-top: 8px; padding: 0; border: 0; background: none; color: var(--muted); font-size: 0.875rem; }
+.toggle::before { content: '▸'; display: inline-block; margin-right: 6px; transition: rotate 0.15s; }
+.toggle.open::before { rotate: 90deg; }
+
+@media (max-width: 520px) {
+  .actions { grid-column: 2; margin-top: 12px; }
+}
+
+.context { grid-column: 2 / -1; margin-top: 12px; padding-left: 16px; border-left: 2px solid var(--line); }
 .note { margin-bottom: 12px; }
 .note p { margin: 0; white-space: pre-wrap; }
 .note a { font-size: 0.875rem; word-break: break-all; }

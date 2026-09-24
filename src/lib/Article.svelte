@@ -39,20 +39,25 @@
 </script>
 
 <article>
-  <a class="title" href={article.url} target="_blank" rel="noopener">{article.title ?? article.url}</a>
-  <p class="muted">{host} · {new Date(article.created_at).toLocaleDateString()}</p>
-  {#if article.clean_text}<p class="recap">{article.clean_text.slice(0, 280)}…</p>{/if}
+  <div class="tally">
+    <span class="bubble agree" title="Agree">{agree}</span>
+    <span class="bubble disagree" title="Disagree">{disagree}</span>
+  </div>
 
-  <div class="actions">
-    <button class="vote agree" class:on={mine === 'agree'} onclick={() => vote('agree')}>Agree {agree}</button>
-    <button class="vote disagree" class:on={mine === 'disagree'} onclick={() => vote('disagree')}>
-      Disagree {disagree}
-    </button>
-    <button class="link" onclick={() => (open = !open)}>
+  <div class="body">
+    <a class="title" href={article.url} target="_blank" rel="noopener">{article.title ?? article.url}</a>
+    <p class="muted">{host} · {new Date(article.created_at).toLocaleDateString()}</p>
+    {#if article.clean_text}<p class="recap">{article.clean_text.slice(0, 280)}…</p>{/if}
+    <button class="toggle" class:open onclick={() => (open = !open)}>
       Context ({article.article_context.length})
     </button>
+    {#if error}<p class="error">{error}</p>{/if}
   </div>
-  {#if error}<p class="error">{error}</p>{/if}
+
+  <div class="actions">
+    <button class="vote agree" class:on={mine === 'agree'} onclick={() => vote('agree')}>Agree</button>
+    <button class="vote disagree" class:on={mine === 'disagree'} onclick={() => vote('disagree')}>Disagree</button>
+  </div>
 
   {#if open}
     <section class="context">
